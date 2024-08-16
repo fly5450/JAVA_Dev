@@ -1,43 +1,22 @@
 package miniproject1;
-
-
-//Controller Layer
 import java.util.List;
-import java.util.Scanner;
-
-
+//Client와의 상호작용을 관리
 public class BoardController {
-private BoardService boardService = new BoardService();
+    private BoardService boardService = new BoardService();
 
-public void createBoard(BoardDTO board) {
-   boardService.createBoard(board);
-}
+    public void createBoard(BoardDTO board) {
+        boardService.createBoard(board);
+    }
 
-public List<BoardDTO> getBoardList() {
-   return boardService.getBoardList();
-}
+    public List<BoardDTO> getBoardList() {
+        return boardService.getBoardList();
+    }
 
-static Scanner scanner = new Scanner(System.in);
+    public void updateBoard(BoardDTO board) {
+        boardService.updateBoard(board);
+    }
 
-public static void boardlist() {
-	System.out.println("목록");
-	System.out.println("번호|       제목                     | 작성일시");
-	for (BoardDTO board : boardlist) {
-		board.print();
-	}
-
-}
-// Update, Delete methods 추가 가능
-
-public void boardUpdate() {
-	
-	
-}
-
-public void boarddDlete() {
-	
-	
-}
-
-
+    public void deleteBoard(int idx) {
+        boardService.deleteBoard(idx);
+    }
 }
