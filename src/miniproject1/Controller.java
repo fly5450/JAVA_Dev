@@ -14,7 +14,7 @@ public class Controller {
         if (result > 0) {
             System.out.println("회원 가입이 성공적으로 완료되었습니다.");
         } else {
-            System.out.println("회원 가입에 실패했습니다.");
+            System.out.println("회원 가입에 실패했습니다. 이미 사용 중인 아이디인지 확인하세요.");
         }
     }
 

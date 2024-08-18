@@ -35,7 +35,7 @@ public class UnifiedDAO  {
 //MemberInfo 테이블 관련 CRUD 메서드-
 // [회원 가입]
 public int registerMember(UnifiedDTO member) {
-    String sql = "INSERT INTO MemberInfo (ID, PASSWORD, MEMBER_NAME, TEL, ADDRESS, SEX) " //실행할 쿼리 선언
+    String sql = "INSERT INTO MemberInfo (ID, PASSWORD, MEMBER_NAME, TEL, ADDRESS, SEX) " 
                + "VALUES (?, ?, ?, ?, ?, ?)";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, member.getId());
@@ -46,7 +46,12 @@ public int registerMember(UnifiedDTO member) {
         pstmt.setString(6, member.getSex());
         return pstmt.executeUpdate();
     } catch (SQLException e) {
-        e.printStackTrace();
+        if (e.getErrorCode() == 1) { // ORA-00001: unique constraint violated
+            System.out.println("이미 가입된 아이디입니다. 다른 아이디를 사용하세요.");
+        } else {
+            e.printStackTrace();
+            System.out.println(e.getErrorCode());
+        }
         return 0;
     }
 }
