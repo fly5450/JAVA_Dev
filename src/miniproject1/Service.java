@@ -17,8 +17,8 @@ public class Service {
         return unifiedDAO.login(id, password);
     }
     // 아이디 찾기
-    public String findMemberId(String id, String password, String tel) {
-        return unifiedDAO.findMemberId(id, password, tel);
+    public String findMemberId(String memberName, String password, String tel) {
+        return unifiedDAO.findMemberId(memberName, password, tel);
     }
     // 비밀번호 초기화
     public int resetPassword(String id, String newPassword) {

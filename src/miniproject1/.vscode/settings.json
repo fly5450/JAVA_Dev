@@ -1,5 +1,9 @@
 {
     "cSpell.words": [
         "miniproject"
+    ],
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "c:\\Dev\\projects\\Mini_project1\\JAVA_Dev\\lib\\ojdbc8-19.12.0.0.jar"
     ]
 }

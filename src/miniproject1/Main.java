@@ -26,7 +26,6 @@ public class Main {
             switch (choice) {
                 case 1 -> registerMember();
                 case 2 -> loginMember();
-                //
                 case 3 -> findMemberId();
                 case 4 -> resetPassword();
                 case 5 -> {
@@ -92,12 +91,11 @@ public class Main {
             UnifiedDTO member = controller.login(id, password);
         } catch (Exception e) {
             e.printStackTrace();
-        }finally{System.out.println("아이디 및 비밀번호가 일치하지 않습니다.");}
+        }
     }
 
   
-    // 아이디 찾기
-    private static void findMemberId() {
+    private static String findMemberId() {
         System.out.println("아이디를 찾기 위해 이름/비밀번호/전화번호를 입력하세요:");
         System.out.print("이름:");
         String memberName = scanner.nextLine();
@@ -105,16 +103,21 @@ public class Main {
         String password = scanner.nextLine();
         System.out.print("전화번호:");
         String tel = scanner.nextLine();
+        
         try {
-            String memberId = controller.findMemberId(memberName, password, tel);
+            String memberId = controller.findMemberId(memberName, password, tel); 
             if (memberId != null) {
                 System.out.println("아이디 찾기 성공: " + memberId);
+                return memberId; // 아이디를 반환
+            } else {
+                System.out.println("아이디 찾기 실패: 이름 또는 전화번호를 확인하세요.");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+        return null; // 실패 시 null 반환
     }
-
  // 비밀번호 초기화
  private static void resetPassword() {
     System.out.println("아이디:");

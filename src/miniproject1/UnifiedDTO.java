@@ -15,7 +15,7 @@ public class UnifiedDTO  {
     // MemberInfo 테이블 관련 필드
     private String id;
     private String password;
-    // private String memberName;
+    private String memberName;
     private String tel;
     private String address;
     private String sex;

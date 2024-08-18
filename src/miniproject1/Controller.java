@@ -33,16 +33,13 @@ public class Controller {
         service.logout(memberId);
         System.out.println("로그아웃 성공! ");
     }
-  // [아이디 찾기]
-    public String findMemberId(String id, String password, String tel) {
-        String memberId = service.findMemberId(id, password, tel);
-         if (memberId != null) {
+    public String findMemberId(String memberName, String password, String tel) {
+        String memberId = service.findMemberId(memberName, password, tel);
+        if (memberId != null) {
             System.out.println("아이디 찾기 성공: 회원님의 아이디는 " + memberId + "입니다.");
-         } else {
-           System.out.println("아이디 찾기 실패: 이름 또는 전화번호를 확인하세요.");
-         }
-          return memberId; // 반환값을 아이디로 수정
-        }
+        } 
+        return memberId; 
+    }
 
     // [비밀번호 초기화]
     public void resetPassword(String id, String newPassword) {
