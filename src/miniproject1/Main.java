@@ -1,46 +1,61 @@
-
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Scanner;
 
-//Client (User) 와 상호작용하는 Console (View layer)
 public class Main {
-    private static MemberController memberController = new MemberController();
+    private static Connection conn; // Connection 객체 생성
+    private static Controller controller;
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
+        
+        try {
+            conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "user01", "5450");
+            controller = new Controller(conn);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+
         while (true) {
             showMenu();
             int choice = scanner.nextInt();
             scanner.nextLine(); // 줄바꿈 문자 처리
 
             switch (choice) {
-                //1. 회원가입.
+                //회원가입
                 case 1:
                     registerMember();
                     break;
-                //2. 로그인
+                //로그인
                 case 2:
                     loginMember();
                     break;
-                //3. 아이디찾기
+                //아이디찾기
                 case 3:
                     findMemberId();
                     break;
-                //4. 비밀번호 초기화
+                //비밀번호 초기화
                 case 4:
                     resetPassword();
                     break;
-                //5. 종료
+                //종료
                 case 5:
                     System.out.println("프로그램을 종료합니다.");
                     scanner.close();
+                    try {
+                        conn.close(); // DB 연결 해제
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                     return;
                 default:
                     System.out.println("올바른 번호를 선택하세요.");
             }
         }
     }
-  
+
     // 메뉴 출력
     private static void showMenu() {
         System.out.println("1. 회원 가입");
@@ -48,79 +63,65 @@ public class Main {
         System.out.println("3. 아이디 찾기");
         System.out.println("4. 비밀번호 초기화");
         System.out.println("5. 종료");
-        System.out.print("선택>>: ");
+        System.out.print("선택: ");
     }
 
-    // 게시물 등록
-    private static void createBoard() {
-        System.out.println("제목:");
-        String title = scanner.nextLine();
-        System.out.println("내용:");
-        String content = scanner.nextLine();
-        System.out.println("작성자:");
-        String writer = scanner.nextLine();
-        
-        BoardDTO board = new BoardDTO();
-        board.setTitle(title);
-        board.setContent(content);
-        board.setWriter(writer);
-        board.setViewCnt(0); // 초기 조회 수 0
-        board.setDeleteYn("N"); // 삭제 여부 초기 값
-        board.setInsertDate(new java.util.Date());
+    // 회원 가입
+    private static void registerMember() {
+        System.out.println("아이디:");
+        String id = scanner.nextLine();
+        System.out.println("비밀번호:");
+        String password = scanner.nextLine();
+        System.out.println("이름:");
+        String memberName = scanner.nextLine();
+        System.out.println("전화번호:");
+        String tel = scanner.nextLine();
+        System.out.println("주소:");
+        String address = scanner.nextLine();
+        System.out.println("성별 (M/F):");
+        String sex = scanner.nextLine();
 
-        controller.createBoard(board);
-        System.out.println("게시물이 등록되었습니다.");
+        //입력값을 DTO객체에게 전달
+        UnifiedDTO member = new UnifiedDTO();
+        member.setId(id);
+        member.setPassword(password);
+        member.setMemberName(memberName);
+        member.setTel(tel);
+        member.setAddress(address);
+        member.setSex(sex);
+        //DTO는 Controller 호출
+        controller.registerMember(member);
     }
 
-    // 게시물 목록 조회
-    private static void viewBoardList() {
-        List<BoardDTO> boardList = controller.getBoardList();
-        for (BoardDTO board : boardList) {
-            System.out.println(board.getIdx() + " | " + board.getTitle() + " | " + board.getWriter() + " | " + board.getInsertDate());
-        }
+    // 로그인
+    private static void loginMember() {
+        System.out.println("<<<로그인>>>");
+        System.out.println("아이디:");
+        String id = scanner.nextLine();
+        System.out.println("비밀번호:");
+        String password = scanner.nextLine();
+        UnifiedDTO member = controller.login(id, password);
     }
 
-    // 게시물 수정
-    private static void updateBoard() {
-        System.out.println("수정할 게시물 번호:");
-        int idx = scanner.nextInt(); scanner.nextLine(); // 줄바꿈 문자 처리
-    
-        // 비밀번호 확인
-        System.out.println("비밀번호를 입력하세요:");
-        String inputPassword = scanner.nextLine();
-    
-        // 사용자 ID (예를 들어, 현재 로그인한 사용자의 ID를 가정)
-        String memberId = "currentUser"; // 실제 ID 값을 사용
-    
-        if (!controller.checkPassword(memberId, inputPassword)) {
-            System.out.println("비밀번호가 일치하지 않습니다. 수정할 수 없습니다.");
-            return;
-        }
-    
-        System.out.println("새 제목:");
-        String title = scanner.nextLine();
-        System.out.println("새 내용:");
-        String content = scanner.nextLine();
-        System.out.println("새 작성자:");
-        String writer = scanner.nextLine();
-    
-        BoardDTO board = new BoardDTO();
-        board.setIdx(idx);
-        board.setTitle(title);
-        board.setContent(content);
-        board.setWriter(writer);
-        board.setUpdateDate(new java.util.Date());
-    
-        controller.updateBoard(board);
-        System.out.println("게시물이 수정되었습니다.");
+    // 아이디 찾기
+    private static void findMemberId() {
+        System.out.println("이름:");
+        String memberName = scanner.nextLine();
+        System.out.println("비밀번호:");
+        String password = scanner.nextLine();
+        System.out.println("전화번호:");
+        String tel = scanner.nextLine();
+
+        controller.findMemberId(memberName, tel);
     }
 
-    // 게시물 삭제
-    private static void deleteBoard() {
-        System.out.println("삭제할 게시물 번호:");
-        int idx = scanner.nextInt();
+    // 비밀번호 초기화
+    private static void resetPassword() {
+        System.out.println("아이디:");
+        String id = scanner.nextLine();
+        System.out.println("새 비밀번호:");
+        String newPassword = scanner.nextLine();
 
-        controller.deleteBoard(idx);
-        System.out.println("게시물이 삭제되었습니다.");
+        controller.resetPassword(id, newPassword);
     }
 }

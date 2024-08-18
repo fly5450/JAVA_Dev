@@ -1,6 +1,7 @@
 import java.sql.Date;
+import java.sql.Timestamp;
 
-public class Dto {
+public class UnifiedDTO  {
     // Board 테이블 관련 필드
     private int idx;
     private String title;
@@ -18,7 +19,10 @@ public class Dto {
     private String tel;
     private String address;
     private String sex;
-
+    // MEMLOG 테이블 관련 필드
+    private Timestamp loginDate;
+    private Timestamp logoutDate;
+//-----------------------------------------------------------------------------//
     // Board 테이블 : Getters 
     public int getIdx() {
         return idx;
@@ -75,7 +79,7 @@ public class Dto {
     public void setDeleteDate(Date deleteDate) {
         this.deleteDate = deleteDate;
     }
-
+//-----------------------------------------------------------------------------//
     //  MemberInfo 테이블 Getters 
     public String getId() {
         return id;
@@ -114,4 +118,19 @@ public class Dto {
     public void setSex(String sex) {
         this.sex = sex;
     }
+//-----------------------------------------------------------------------------//
+     // MEMLOG 테이블 Getter , Setter
+public Timestamp getLoginDate() {
+    return loginDate;
+}
+public Timestamp getLogoutDate() {
+    return logoutDate;
+}
+public void setLoginDate(Timestamp loginDate) {
+    this.loginDate = loginDate;
+}
+public void setLogoutDate(Timestamp logoutDate) {
+    this.logoutDate = logoutDate;
+}
+//-----------------------------------------------------------------------------//
 }
