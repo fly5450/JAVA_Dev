@@ -1,6 +1,6 @@
 package miniproject1;
 import java.util.List;
-//Client와의 상호작용을 관리
+//client(User) 와 상호작용
 public class BoardController {
     private BoardService boardService = new BoardService();
 

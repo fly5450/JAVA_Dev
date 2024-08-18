@@ -40,7 +40,7 @@ public void setDeleteYn(String deleteYn) {this.deleteYn = deleteYn;}
 public void setInsertDate(Date insertDate) {this.insertDate = insertDate;}
 public void setUpdateDate(java.util.Date date) {this.updateDate = date;}
 public void setDeleteDate(Date deleteDate) { this.deleteDate = deleteDate;}
-public static void createdate(SimpleDateFormat createdate) {this.createdate = createdate;}
+public static void createdate(SimpleDateFormat createdate) {createdate = createdate;}
 public void setLogindate(SimpleDateFormat loginDate) {this.logindate = logindate;}
 
     @Override
