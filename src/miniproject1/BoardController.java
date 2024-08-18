@@ -1,18 +1,18 @@
-package miniproject1;
+
 import java.util.List;
 //client(User) 와 상호작용
 public class BoardController {
     private BoardService boardService = new BoardService();
 
-    public void createBoard(BoardDTO board) {
+    public void createBoard(Dto board) {
         boardService.createBoard(board);
     }
 
-    public List<BoardDTO> getBoardList() {
+    public List<Dto> getBoardList() {
         return boardService.getBoardList();
     }
 
-    public void updateBoard(BoardDTO board) {
+    public void updateBoard(Dto board) {
         boardService.updateBoard(board);
     }
 

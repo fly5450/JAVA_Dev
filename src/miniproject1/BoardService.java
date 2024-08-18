@@ -1,4 +1,4 @@
-package miniproject1;
+
 import java.util.List;
 
 /*Service Layer 비즈니스 로직을 담당하는 클래스
@@ -26,31 +26,102 @@ DAO 클래스를 사용하여 데이터베이스와 상호작용하면서, 애�
 여러 컨트롤러에서 동일한 비즈니스 로직을 수행해야 하는 경우, 그 로직을 서비스 계층에서 관리함으로써 코드 중복을 피할 수 있습니다.
 
 <Service를 이해하기 위한 큰 틀>
-1. Client가 Request를 보낸다.(Ajax, Axios, fetch등..)
+1. Client가 Request를 보낸다.
 2. Request URL에 알맞은 Controller가 수신 받는다. (@Controller , @RestController)
 3. Controller 는 넘어온 요청을 처리하기 위해 Service 를 호출한다.
 4. Service는 알맞은 정보를 가공하여 Controller에게 데이터를 넘긴다.
 5. Controller 는 Service 의 결과물을 Client 에게 전달해준다.
 
 */
-public class BoardService {
-    private BoardDAO boardDAO = new BoardDAO();
+public class Service {
+    private Dao dao = new Dao();
 
-    public int createBoard(BoardDTO board) {
-        return boardDAO.insertBoard(board);
+    public Service(Connection conn) {
+        this.dao = new Dao(conn);
     }
+ // 회원 가입
+ public int registerMember(Dao member) {
+    return Dao.registerMember(member);
+}
 
-    public List<BoardDTO> getBoardList() {
-        return boardDAO.getAllBoards();
+// 로그인
+public DAO login(String id, String password) {
+    return Dao.login(id, password);
+}
+
+// 아이디 찾기
+public String findMemberId(String memberName, String tel) {
+    return Dao.findMemberId(memberName, tel);
+}
+
+// 비밀번호 초기화
+public int resetPassword(String id, String newPassword) {
+    return Dao.resetPassword(id, newPassword);
+}
+
+
+
+    //게시글 생성 기능
+    public int createBoard(Dto board) {
+        return Dao.insertBoard(board);
     }
-
-    public int updateBoard(BoardDTO board) {
-        return boardDAO.updateBoard(board);
+    //모든 게시글 출력 기능
+    public List<Dto> getBoardList() {
+        return Dao.getAllBoards();
     }
-
+    //게시글 수정 기능
+    public int updateBoard(Dto board) {
+        return Dao.updateBoard(board);
+    }
+    //게시글 삭제 기능
     public int deleteBoard(int idx) {
-        return boardDAO.deleteBoard(idx);
+        return Dao.deleteBoard(idx);
     }
+    //비밀번호 체크 기능 :  입력된 비밀번호와 저장된 비밀번호를 비교한다.
+    public boolean checkPassword(String memberId, String inputPassword) {
+        String savedPassword = boardDAO.getPasswordById(memberId);
+        return savedPassword != null && savedPassword.equals(inputPassword);
+    }
+
+    /*
+     *  private UnifiedDAO unifiedDAO;
+
+    public MemberService(Connection conn) {
+        this.unifiedDAO = new UnifiedDAO(conn);
+    }
+
+    // 회원 가입
+    public int registerMember(UnifiedDTO member) {
+        return unifiedDAO.registerMember(member);
+    }
+
+    // 로그인
+    public UnifiedDTO login(String id, String password) {
+        return unifiedDAO.login(id, password);
+    }
+
+    // 아이디 찾기
+    public String findMemberId(String memberName, String tel) {
+        return unifiedDAO.findMemberId(memberName, tel);
+    }
+
+    // 비밀번호 초기화
+    public int resetPassword(String id, String newPassword) {
+        return unifiedDAO.resetPassword(id, newPassword);
+    }
+    
+    // 추가된 기능 예시: 게시물 조회
+    public UnifiedDTO getBoard(int idx) {
+        return unifiedDAO.getBoard(idx);
+    }
+
+    // 게시물 추가
+    public int insertBoard(UnifiedDTO board) {
+        return unifiedDAO.insertBoard(board);
+    }
+     * 
+     * 
+     */
 }
 
 
