@@ -13,12 +13,12 @@ public class Service {
         return unifiedDAO.registerMember(member);
     }
     // 로그인
-    public UnifiedDTO login(String id, String password) {
-        return unifiedDAO.login(id, password);
+    public String login(String id, String password) {
+        return login(id, password);
     }
     // 아이디 찾기
-    public String findMemberId(String memberName, String password, String tel) {
-        return unifiedDAO.findMemberId(memberName, password, tel);
+    public String findMemberId(String id, String password, String tel) {
+        return findMemberId(id, password, tel);
     }
     // 비밀번호 초기화
     public int resetPassword(String id, String newPassword) {
@@ -49,8 +49,8 @@ public class Service {
     /* 
     로그인 시 loginLogRecord 메서드를 호출하여 로그아웃 시간을 기록함. */
     // 로그인 log기록
-     public UnifiedDTO loginLogRecord(String id, String password) {
-        UnifiedDTO member = unifiedDAO.login(id, password);
+     public String loginLogRecord(String id, String password) {
+        String member = login(id, password);
         if (member != null) {
             unifiedDAO.recordLogin(id); // 로그인 이력 기록
         }

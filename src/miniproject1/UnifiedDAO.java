@@ -51,7 +51,7 @@ public int registerMember(UnifiedDTO member) {
     }
 }
  // [로그인]
- public UnifiedDTO login(String id, String password) {
+ public void login(String id, String password) {
     String sql = "SELECT * FROM MemberInfo WHERE ID = ? AND PASSWORD = ?"; //실행할 쿼리 선언
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, id);
@@ -65,12 +65,11 @@ public int registerMember(UnifiedDTO member) {
             member.setTel(rs.getString("TEL"));
             member.setAddress(rs.getString("ADDRESS"));
             member.setSex(rs.getString("SEX"));
-            return member;
         }
     } catch (SQLException e) {
         e.printStackTrace();
     }
-    return null;
+    return;
 }
   // 로그인 시 로그 기록 및 회원 테이블에 로그인 시간 업데이트
   public void recordLogin(String memberId) {

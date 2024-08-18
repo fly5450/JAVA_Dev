@@ -1,6 +1,8 @@
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Scanner;
 
 public class Main {
@@ -80,20 +82,50 @@ public class Main {
         controller.registerMember(member);
     }
 
-    // 로그인
+    //로그인
     private static void loginMember() {
         System.out.println("<<<로그인>>>");
         System.out.print("아이디:");
         String id = scanner.nextLine();
         System.out.print("비밀번호:");
         String password = scanner.nextLine();
+    
         try {
-            UnifiedDTO member = controller.login(id, password);
+            String memberName = controller.login(id, password);
+            if (memberName != null) {
+                System.out.println("로그인 성공: " + memberName + "님 환영합니다.");
+            } else {
+                System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    //로그인 - PL/SQL 함수 호출
+    public String loginMember(String id, String password) {
+        String memberName = null;
+        String sql = "{ ? = call login_member(?, ?) }";  // PL/SQL 함수 호출
 
+        try (CallableStatement cstmt = conn.prepareCall(sql)) {
+            // 출력 파라미터 설정
+            cstmt.registerOutParameter(1, Types.VARCHAR);
+
+            // 입력 파라미터 설정
+            cstmt.setString(2, id);
+            cstmt.setString(3, password);
+
+            // 함수 실행
+            cstmt.execute();
+
+            // 출력 파라미터 값 가져오기
+            memberName = cstmt.getString(1);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return memberName;
+    }
   
     private static String findMemberId() {
         System.out.println("아이디를 찾기 위해 이름/비밀번호/전화번호를 입력하세요:");

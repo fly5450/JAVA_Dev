@@ -19,10 +19,10 @@ public class Controller {
     }
 
     // [로그인]
-    public UnifiedDTO login(String id, String password) throws Exception {
-        UnifiedDTO member = service.login(id, password);
+    public String login(String id, String password) throws Exception {
+        String member = service.login(id, password);
         if (member != null) {
-            System.out.println("로그인 성공: " + member.getId() + "님 환영합니다."); // getMemberName 미사용.
+            System.out.println("로그인 성공: " + id + "님 환영합니다."); 
             return member;
         } else {
             System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
