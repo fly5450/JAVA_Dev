@@ -72,7 +72,7 @@ public class Main {
         UnifiedDTO member = new UnifiedDTO();
         member.setId(id);
         member.setPassword(password);
-        // member.setMemberName(memberName); 미사용
+        member.setMemberName(memberName);
         member.setTel(tel);
         member.setAddress(address);
         member.setSex(sex);

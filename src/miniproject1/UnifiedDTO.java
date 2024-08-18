@@ -87,9 +87,9 @@ public class UnifiedDTO  {
     public String getPassword() {
         return password;
     }
-    // public String getMemberName() {
-    //     return memberName;
-    // }
+    public String getMemberName() {
+        return memberName;
+    }
     public String getTel() {
         return tel;
     }
@@ -106,9 +106,9 @@ public class UnifiedDTO  {
     public void setPassword(String password) {
         this.password = password;
     }
-    // public void setMemberName(String memberName) {
-    //     this.memberName = memberName;
-    // }
+    public void setMemberName(String memberName) {
+        this.memberName = memberName;
+    }
     public void setTel(String tel) {
         this.tel = tel;
     }
@@ -133,4 +133,5 @@ public void setLogoutDate(Timestamp logoutDate) {
     this.logoutDate = logoutDate;
 }
 //-----------------------------------------------------------------------------//
+
 }

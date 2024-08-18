@@ -1,9 +1,11 @@
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 //  DB (Model)에 접근하여 쿼리 실행을 하는 객체.
@@ -38,7 +40,7 @@ public int registerMember(UnifiedDTO member) {
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, member.getId());
         pstmt.setString(2, member.getPassword());
-        // pstmt.setString(3, member.getMemberName());
+        pstmt.setString(3, member.getMemberName());
         pstmt.setString(4, member.getTel());
         pstmt.setString(5, member.getAddress());
         pstmt.setString(6, member.getSex());
@@ -103,21 +105,51 @@ public int registerMember(UnifiedDTO member) {
     }
 }
   // 아이디 찾기
-  public String findMemberId(String id,String password, String tel) {
-    String sql = "SELECT ID FROM MemberInfo WHERE MEMBER_NAME = ? AND TEL = ?";
-    try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-        pstmt.setString(1, id);
-        pstmt.setString(2, password);
-        pstmt.setString(3, tel);
-        ResultSet rs = pstmt.executeQuery();
-        if (rs.next()) {
-            return rs.getString("ID");
+//   public String findMemberId(String id,String password, String tel) {
+//     String sql = "SELECT ID FROM MemberInfo WHERE MEMBER_NAME = ? AND TEL = ?";
+//     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//         pstmt.setString(1, id);
+//         pstmt.setString(2, password);
+//         pstmt.setString(3, tel);
+//         ResultSet rs = pstmt.executeQuery();
+//         if (rs.next()) {
+//             return rs.getString("ID");
+//         }
+//     } catch (SQLException e) {
+//         e.printStackTrace();
+//     }
+//     return null;
+// }
+ // 아이디 찾기 - PL/SQL 프로시저 호출
+    public String findMemberId(String memberName, String password, String tel) {
+        String memberId = null;
+        String sql = "{call find_member_id(?, ?, ?, ?)}"; 
+         /*PL/SQL 프로시저 호출 p_member_name IN VARCHAR2,
+        p_password IN VARCHAR2,
+        p_tel IN VARCHAR2,
+        p_member_id OUT VARCHAR2 */ 
+
+        try (CallableStatement cstmt = conn.prepareCall(sql)) {
+            // 입력 파라미터 설정
+            cstmt.setString(1, memberName);
+            cstmt.setString(2, password);
+            cstmt.setString(3, tel);
+
+            // 출력 파라미터 설정
+            cstmt.registerOutParameter(4, Types.VARCHAR);
+
+            // 프로시저 실행
+            cstmt.execute();
+
+            // 출력 파라미터 값 가져오기
+            memberId = cstmt.getString(4);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+
+        return memberId;
     }
-    return null;
-}
 
  // 비밀번호 초기화
  public int resetPassword(String id, String newPassword) {
