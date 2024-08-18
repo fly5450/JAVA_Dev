@@ -24,24 +24,12 @@ public class Main {
             scanner.nextLine(); // 줄바꿈 문자 처리
 
             switch (choice) {
-                //회원가입
-                case 1:
-                    registerMember();
-                    break;
-                //로그인
-                case 2:
-                    loginMember();
-                    break;
-                //아이디찾기
-                case 3:
-                    findMemberId();
-                    break;
-                //비밀번호 초기화
-                case 4:
-                    resetPassword();
-                    break;
-                //종료
-                case 5:
+                case 1 -> registerMember();
+                case 2 -> loginMember();
+                //
+                case 3 -> findMemberId();
+                case 4 -> resetPassword();
+                case 5 -> {
                     System.out.println("프로그램을 종료합니다.");
                     scanner.close();
                     try {
@@ -50,8 +38,8 @@ public class Main {
                         e.printStackTrace();
                     }
                     return;
-                default:
-                    System.out.println("올바른 번호를 선택하세요.");
+                }
+                default -> System.out.println("올바른 번호를 선택하세요.");
             }
         }
     }
@@ -85,7 +73,7 @@ public class Main {
         UnifiedDTO member = new UnifiedDTO();
         member.setId(id);
         member.setPassword(password);
-        member.setMemberName(memberName);
+        // member.setMemberName(memberName); 미사용
         member.setTel(tel);
         member.setAddress(address);
         member.setSex(sex);
@@ -96,32 +84,44 @@ public class Main {
     // 로그인
     private static void loginMember() {
         System.out.println("<<<로그인>>>");
-        System.out.println("아이디:");
+        System.out.print("아이디:");
         String id = scanner.nextLine();
-        System.out.println("비밀번호:");
+        System.out.print("비밀번호:");
         String password = scanner.nextLine();
-        UnifiedDTO member = controller.login(id, password);
+        try {
+            UnifiedDTO member = controller.login(id, password);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally{System.out.println("아이디 및 비밀번호가 일치하지 않습니다.");}
     }
 
+  
     // 아이디 찾기
     private static void findMemberId() {
-        System.out.println("이름:");
+        System.out.println("아이디를 찾기 위해 이름/비밀번호/전화번호를 입력하세요:");
+        System.out.print("이름:");
         String memberName = scanner.nextLine();
-        System.out.println("비밀번호:");
+        System.out.print("비밀번호:");
         String password = scanner.nextLine();
-        System.out.println("전화번호:");
+        System.out.print("전화번호:");
         String tel = scanner.nextLine();
-
-        controller.findMemberId(memberName, tel);
+        try {
+            String memberId = controller.findMemberId(memberName, password, tel);
+            if (memberId != null) {
+                System.out.println("아이디 찾기 성공: " + memberId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    // 비밀번호 초기화
-    private static void resetPassword() {
-        System.out.println("아이디:");
-        String id = scanner.nextLine();
-        System.out.println("새 비밀번호:");
-        String newPassword = scanner.nextLine();
+ // 비밀번호 초기화
+ private static void resetPassword() {
+    System.out.println("아이디:");
+    String id = scanner.nextLine();
+    System.out.println("새 비밀번호:");
+    String newPassword = scanner.nextLine();
 
-        controller.resetPassword(id, newPassword);
+    controller.resetPassword(id, newPassword);
     }
 }

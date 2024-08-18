@@ -39,7 +39,7 @@ public int registerMember(UnifiedDTO member) {
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, member.getId());
         pstmt.setString(2, member.getPassword());
-        pstmt.setString(3, member.getMemberName());
+        // pstmt.setString(3, member.getMemberName());
         pstmt.setString(4, member.getTel());
         pstmt.setString(5, member.getAddress());
         pstmt.setString(6, member.getSex());
@@ -60,7 +60,7 @@ public int registerMember(UnifiedDTO member) {
             UnifiedDTO member = new UnifiedDTO();
             member.setId(rs.getString("ID"));
             member.setPassword(rs.getString("PASSWORD"));
-            member.setMemberName(rs.getString("MEMBER_NAME"));
+            // member.setMemberName(rs.getString("MEMBER_NAME"));
             member.setTel(rs.getString("TEL"));
             member.setAddress(rs.getString("ADDRESS"));
             member.setSex(rs.getString("SEX"));
@@ -90,7 +90,7 @@ public int registerMember(UnifiedDTO member) {
         e.printStackTrace();
     }
 }
- // 로그아웃 시 로그아웃 시간 기록
+ // 로그아웃 시 로그아웃 시간 기록 recordLogout 메서드를 통해 두 테이블에 로그아웃 시간을 업데이트
  public void recordLogout(String memberId) {
     String sql = "UPDATE MEMLOG SET logoutDate = ? WHERE id = ? AND logoutDate IS NULL";
     Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -104,11 +104,12 @@ public int registerMember(UnifiedDTO member) {
     }
 }
   // 아이디 찾기
-  public String findMemberId(String memberName, String tel) {
+  public String findMemberId(String id,String password, String tel) {
     String sql = "SELECT ID FROM MemberInfo WHERE MEMBER_NAME = ? AND TEL = ?";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-        pstmt.setString(1, memberName);
-        pstmt.setString(2, tel);
+        pstmt.setString(1, id);
+        pstmt.setString(2, password);
+        pstmt.setString(3, tel);
         ResultSet rs = pstmt.executeQuery();
         if (rs.next()) {
             return rs.getString("ID");

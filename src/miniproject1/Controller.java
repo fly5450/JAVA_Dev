@@ -19,26 +19,30 @@ public class Controller {
     }
 
     // [로그인]
-    public UnifiedDTO login(String id, String password) {
+    public UnifiedDTO login(String id, String password) throws Exception {
         UnifiedDTO member = service.login(id, password);
         if (member != null) {
-            System.out.println("로그인 성공: " + member.getMemberName() + "님 환영합니다.");
+            System.out.println("로그인 성공: " + member.getId() + "님 환영합니다."); // getMemberName 미사용.
             return member;
         } else {
             System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
             return null;
         }
     }
-
-    // [아이디 찾기]
-    public void findMemberId(String memberName, String tel) {
-        String id = service.findMemberId(memberName, tel);
-        if (id != null) {
-            System.out.println("아이디 찾기 성공: 회원님의 아이디는 " + id + "입니다.");
-        } else {
-            System.out.println("아이디 찾기 실패: 이름 또는 전화번호를 확인하세요.");
-        }
+    public void logout(String memberId) {
+        service.logout(memberId);
+        System.out.println("로그아웃 성공! ");
     }
+  // [아이디 찾기]
+    public String findMemberId(String id, String password, String tel) {
+        String memberId = service.findMemberId(id, password, tel);
+         if (memberId != null) {
+            System.out.println("아이디 찾기 성공: 회원님의 아이디는 " + memberId + "입니다.");
+         } else {
+           System.out.println("아이디 찾기 실패: 이름 또는 전화번호를 확인하세요.");
+         }
+          return memberId; // 반환값을 아이디로 수정
+        }
 
     // [비밀번호 초기화]
     public void resetPassword(String id, String newPassword) {
@@ -84,8 +88,8 @@ public class Controller {
     public void deleteBoard(int idx) {
         int result = service.deleteBoard(idx);
             if ( result > 0) {
-                System.out.println("게시물이 성공적으로 삭제되었습니다.");
-             } else {
+                System.out.println("게시물이 성공적으로 삭제되었습니다."); }
+                else {
                     System.out.println("게시물 삭제에 실패했습니다.");
                 }
             }
