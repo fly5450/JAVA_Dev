@@ -33,8 +33,8 @@ public class Service {
         return unifiedDAO.getPasswordById(memberId);
     }
      //현재 비밀번호 확인
-     public String getMemberById(String memberId) {
-        return unifiedDAO.getMemberById();
+     public UnifiedDTO getMemberById(String memberId) {
+        return unifiedDAO.getMemberById(memberId);
     }
     // 게시물 조회
     public List<UnifiedDTO> getAllBoards() {
@@ -63,7 +63,7 @@ public class Service {
      public String loginLogRecord(String id, String password) {
         String member = login(id, password);
         if (member != null) {
-            unifiedDAO.recordLogin(id); // 로그인 이력 기록
+            unifiedDAO.recordLoginTo(id); // 로그인 이력 기록
         }
         return member;
     }

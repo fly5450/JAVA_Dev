@@ -62,7 +62,9 @@ public int registerMember(UnifiedDTO member) {
         pstmt.setString(1, id);
         pstmt.setString(2, password);
         ResultSet rs = pstmt.executeQuery();
+        
         if (rs.next()) {
+            // 로그인 성공 시 사용자 정보를 DTO에 담는다.
             UnifiedDTO member = new UnifiedDTO();
             member.setId(rs.getString("ID"));
             member.setPassword(rs.getString("PASSWORD"));
@@ -70,24 +72,22 @@ public int registerMember(UnifiedDTO member) {
             member.setTel(rs.getString("TEL"));
             member.setAddress(rs.getString("ADDRESS"));
             member.setSex(rs.getString("SEX"));
+            
+            // 로그인 성공 시 사용자의 이름을 반환함.
+            return member.getMemberName();
+        } else {
+            // 로그인 실패 시 null 반환
+            return null;
         }
     } catch (SQLException e) {
         e.printStackTrace();
+        return null;
     }
-    return id;
 }
-    public void logout(String id, String password){
-        String sql = "SELECT * FROM MemberInfo WHERE ID = ? AND PASSWORD = ?";
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-            try {
-                pstmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-    }
+
     //---------------------------------------------------------------------------------------------------------------------------//
 // 로그인 시 로그 기록 및 회원 테이블에 로그인 시간 업데이트
-  public void recordLogin(String memberId) {
+  public void recordLoginTo(String memberId) {
     String sqlLog = "INSERT INTO MEMLOG (id, loginDate) VALUES (?, ?)";
     String sqlUpdateMember = "UPDATE MemberInfo SET lastLoginDate = ? WHERE id = ?";
     Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -109,7 +109,6 @@ public int registerMember(UnifiedDTO member) {
  public void recordLogoutTo(String memberId) {
     String sql = "UPDATE MEMLOG SET logoutDate = ? WHERE id = ? AND logoutDate IS NULL";
     Timestamp now = new Timestamp(System.currentTimeMillis());
-
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setTimestamp(1, now);
         pstmt.setString(2, memberId);
@@ -117,9 +116,9 @@ public int registerMember(UnifiedDTO member) {
     } catch (SQLException e) {
         e.printStackTrace();
     }
+
     String sql2 = "UPDATE MEMBERINFO SET logoutDate = ? WHERE id = ? AND logoutDate IS NULL";
     Timestamp now2 = new Timestamp(System.currentTimeMillis());
-
     try (PreparedStatement pstmt = conn.prepareStatement(sql2)) {
         pstmt.setTimestamp(1, now2);
         pstmt.setString(2, memberId);
@@ -215,7 +214,7 @@ public int registerMember(UnifiedDTO member) {
         }
     }
 
-   // [게시물을 수정]
+   // [게시물수정]
    public int updateBoard(UnifiedDTO board) {
     String sql = "UPDATE board SET title = ?, content = ?, writer = ?, view_cnt = ?, "
                + "delete_yn = ?, update_date = ? WHERE idx = ?";
@@ -268,6 +267,31 @@ public int registerMember(UnifiedDTO member) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    // 게시물 목록 조회
+    public List<UnifiedDTO> getAllBoards() {
+        List<UnifiedDTO> boardList = new ArrayList<>();
+        String sql = "SELECT * FROM board";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                UnifiedDTO board = new UnifiedDTO();
+                board.setIdx(rs.getInt("idx"));
+                board.setTitle(rs.getString("title"));
+                board.setContent(rs.getString("content"));
+                board.setWriter(rs.getString("writer"));
+                board.setViewCnt(rs.getInt("view_cnt"));
+                board.setDeleteYn(rs.getString("delete_yn"));
+                board.setInsertDate(rs.getDate("insert_date"));
+                board.setUpdateDate(rs.getDate("update_date"));
+                board.setDeleteDate(rs.getDate("delete_date"));
+                boardList.add(board);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return boardList;
     }
 //---------------------------------------------------------------------------------------------------------------------------//
     // [관리자 기능: 모든 회원 목록 조회]

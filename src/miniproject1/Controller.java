@@ -31,7 +31,7 @@ public class Controller {
     }
     // [로그아웃]
     public void logout(String memberId) {
-        service.logout(memberId);
+        service.recordLogoutToTable(memberId);
         System.out.println("로그아웃 성공! ");
     }
 

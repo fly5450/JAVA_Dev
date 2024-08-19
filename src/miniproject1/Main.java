@@ -30,7 +30,7 @@ public class Main {
                     case 2 -> loginMember();
                     case 3 -> findMemberId();
                     case 4 -> resetPassword();
-                    case 5 -> programExit();
+                    case 5 -> { logout(); programExit();}
                     default -> System.out.println("올바른 번호를 선택하세요.");
                 }
             } else {
@@ -46,6 +46,7 @@ public class Main {
                     case 4 -> logout(); //4. 로그아웃
                     case 5 -> secession(); //5. 회원탈퇴
                     case 6 -> programExit(); //6. 종료
+                    case 666 -> { isAdmin = true;  System.out.println("관리자 모드로 전환되었습니다.");}
                     default -> System.out.println("올바른 번호를 선택하세요.");
                 }
             }
@@ -65,7 +66,7 @@ public class Main {
             System.out.println("3. 아이디 찾기");
             System.out.println("4. 비밀번호 초기화");
             System.out.println("5. 종료");
-            System.out.print("선택: ");
+            System.out.print("선택>>: ");
     }
     // [내정보보기]
     private static void showMyInfo() {
@@ -89,8 +90,6 @@ public class Main {
         String tel = getInput("전화번호:");
         String address = getInput("주소:");
         String sex = getInput("성별 (M/F):");
-
-
         UnifiedDTO member = new UnifiedDTO();
         member.setId(id);
         member.setPassword(password);
@@ -100,7 +99,7 @@ public class Main {
         member.setSex(sex);
         controller.registerMember(member);
     }
-    //[ 2번- 유저 메뉴 ]
+    //[유저로그인 메뉴 ]
     private static void showUserMenu(){
         System.out.println("1. 나의 정보 확인");
         System.out.println("2. 게시물 목록");
