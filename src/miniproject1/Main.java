@@ -11,7 +11,6 @@ public class Main {
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        
         try {
             conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "user01", "5450");
             controller = new Controller(conn);
@@ -44,7 +43,6 @@ public class Main {
             }
         }
     }
-
     // 메뉴 출력
     private static void showMenu() {
         System.out.println("1. 회원 가입");

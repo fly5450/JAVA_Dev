@@ -14,11 +14,11 @@ public class Service {
     }
     // 로그인
     public String login(String id, String password) {
-        return login(id, password);
+        return unifiedDAO.login(id, password);
     }
     // 아이디 찾기
-    public String findMemberId(String id, String password, String tel) {
-        return findMemberId(id, password, tel);
+    public String findMemberId(String member_Name, String password, String tel) {
+        return unifiedDAO.findMemberId(member_Name, password, tel);
     }
     // 비밀번호 초기화
     public int resetPassword(String id, String newPassword) {
@@ -36,7 +36,6 @@ public class Service {
     public int insertBoard(UnifiedDTO board) {
         return unifiedDAO.insertBoard(board);
     }
-
      // 게시글 삭제
     public int deleteBoard(int idx) {
         return unifiedDAO.deleteBoard(idx);

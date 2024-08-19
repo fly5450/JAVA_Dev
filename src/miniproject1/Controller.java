@@ -20,10 +20,10 @@ public class Controller {
 
     // [로그인]
     public String login(String id, String password) throws Exception {
-        String member = service.login(id, password);
-        if (member != null) {
+        String result = service.login(id, password);
+        if (result != null) {
             System.out.println("로그인 성공: " + id + "님 환영합니다."); 
-            return member;
+            return result;
         } else {
             System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
             return null;

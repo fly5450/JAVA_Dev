@@ -56,7 +56,7 @@ public int registerMember(UnifiedDTO member) {
     }
 }
  // [로그인]
- public void login(String id, String password) {
+ public String login(String id, String password) {
     String sql = "SELECT * FROM MemberInfo WHERE ID = ? AND PASSWORD = ?"; //실행할 쿼리 선언
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, id);
@@ -125,36 +125,32 @@ public int registerMember(UnifiedDTO member) {
 //     return null;
 // }
  // 아이디 찾기 - PL/SQL 프로시저 호출
-    public String findMemberId(String memberName, String password, String tel) {
-        String memberId = null;
-        String sql = "{call find_member_id(?, ?, ?, ?)}"; 
-         /*PL/SQL 프로시저 호출 p_member_name IN VARCHAR2,
-        p_password IN VARCHAR2,
-        p_tel IN VARCHAR2,
-        p_member_id OUT VARCHAR2 */ 
+ public String findMemberId(String memberName, String password, String tel) {
+    String memberId = null;
+    String sql = "{call FIND_MEMBER_ID(?, ?, ?, ?)}";
 
-        try (CallableStatement cstmt = conn.prepareCall(sql)) {
-            // 입력 파라미터 설정
-            cstmt.setString(1, memberName);
-            cstmt.setString(2, password);
-            cstmt.setString(3, tel);
+    try (CallableStatement cstmt = conn.prepareCall(sql)) {
+        // 입력 파라미터 설정
+        cstmt.setString(1, memberName);
+        cstmt.setString(2, password);
+        cstmt.setString(3, tel);
 
-            // 출력 파라미터 설정
-            cstmt.registerOutParameter(4, Types.VARCHAR);
+        // 출력 파라미터 설정
+        cstmt.registerOutParameter(4, Types.VARCHAR);
 
-            // 프로시저 실행
-            cstmt.execute();
+        // 프로시저 실행
+        cstmt.execute();
 
-            // 출력 파라미터 값 가져오기
-            memberId = cstmt.getString(4);
-            
-        } catch (Exception e) {
+        // 출력 파라미터 값 가져오기
+        memberId = cstmt.getString(4);
+    } catch (Exception e) {
+       System.err.println("Service.findMemberId 오류: " + e.getMessage());
             e.printStackTrace();
-        }
-
-        return memberId;
+            return null;
     }
 
+    return memberId;
+}
  // 비밀번호 초기화
  public int resetPassword(String id, String newPassword) {
     String sql = "UPDATE MemberInfo SET PASSWORD = ? WHERE ID = ?";

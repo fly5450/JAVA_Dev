@@ -14,9 +14,5 @@ BEGIN
     P_TEL => P_TEL,
     P_MEMBER_ID => P_MEMBER_ID
   );
-  /* Legacy output: 
 DBMS_OUTPUT.PUT_LINE('P_MEMBER_ID = ' || P_MEMBER_ID);
-*/ 
-  :P_MEMBER_ID := P_MEMBER_ID;
---rollback; 
 END;
