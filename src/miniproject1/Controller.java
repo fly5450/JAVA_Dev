@@ -25,7 +25,6 @@ public class Controller {
             System.out.println("로그인 성공: " +  id+ "님 환영합니다."); 
             return result;
         } else {
-            System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
             return null;
         }
     }
