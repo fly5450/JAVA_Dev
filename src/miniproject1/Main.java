@@ -1,16 +1,17 @@
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Types;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    private static Connection conn; // Connection 객체 생성
-    private static Controller controller;
+    private static Connection conn; // Connection 객체 선언
+    private static Controller controller; //Controller 객체 선언
     private static Scanner scanner = new Scanner(System.in);
-
-    public static void main(String[] args) {
+    private static String loggedInUserId = null; //프로그램 시작시 비로그인 상태
+    private static boolean isAdmin = false;  // 관리자 여부 체크
+    
+    public static void main(String[] args) throws Exception {
         try {
             conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "user01", "5450");
             controller = new Controller(conn);
@@ -18,57 +19,78 @@ public class Main {
             e.printStackTrace();
             return;
         }
-
+        
         while (true) {
-            showMenu();
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // 줄바꿈 문자 처리
-
-            switch (choice) {
-                case 1 -> registerMember();
-                case 2 -> loginMember();
-                case 3 -> findMemberId();
-                case 4 -> resetPassword();
-                case 5 -> {
-                    System.out.println("프로그램을 종료합니다.");
-                    scanner.close();
-                    try {
-                        conn.close(); // DB 연결 해제
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    return;
+            if (loggedInUserId == null) {
+                showMainMenu();
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // 입력버퍼 클리어
+                switch (choice) {
+                    case 1 -> registerMember();
+                    case 2 -> loginMember();
+                    case 3 -> findMemberId();
+                    case 4 -> resetPassword();
+                    case 5 -> programExit();
+                    default -> System.out.println("올바른 번호를 선택하세요.");
                 }
-                default -> System.out.println("올바른 번호를 선택하세요.");
+            } else {
+                showUserMenu();
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // 입력버퍼 클리어
+                switch (choice) {
+                    case 1 -> showMyInfo(); //1.나의정보보기
+                    case 2 -> getAllBoards();  //2. 게시물 목록
+                    case 3 -> {             //3. 회원 목록(관리자인경우)
+                        if (isAdmin) {showMemberAll();}
+                        else { System.out.println("접근 권한이 없습니다."); }}
+                    case 4 -> logout(); //4. 로그아웃
+                    case 5 -> secession(); //5. 회원탈퇴
+                    case 6 -> programExit(); //6. 종료
+                    default -> System.out.println("올바른 번호를 선택하세요.");
+                }
             }
         }
     }
-    // 메뉴 출력
-    private static void showMenu() {
-        System.out.println("1. 회원 가입");
-        System.out.println("2. 로그인");
-        System.out.println("3. 아이디 찾기");
-        System.out.println("4. 비밀번호 초기화");
-        System.out.println("5. 종료");
-        System.out.print("선택: ");
+    //[회원탈퇴]
+    private static void secession() {
+        String memberId = getInput("아이디 : ");
+        String pass = getInput("비밀번호 : ");
+        String certpass = getInput("비밀번호 확인 : ");
+        controller.deleteMember(memberId, pass, certpass);
     }
-
-    // 회원 가입
+    // [메인메뉴 출력]
+    private static void showMainMenu() {
+            System.out.println("1. 회원 가입");
+            System.out.println("2. 로그인");
+            System.out.println("3. 아이디 찾기");
+            System.out.println("4. 비밀번호 초기화");
+            System.out.println("5. 종료");
+            System.out.print("선택: ");
+    }
+    // [내정보보기]
+    private static void showMyInfo() {
+        UnifiedDTO myInfo = controller.getMyInfo(loggedInUserId);
+        if (myInfo != null) {
+            System.out.println("아이디: " + myInfo.getId());
+            System.out.println("이름: " + myInfo.getMemberName());
+            System.out.println("전화번호: " + myInfo.getTel());
+            System.out.println("주소: " + myInfo.getAddress());
+            System.out.println("성별: " + myInfo.getSex());
+        } else {
+            System.out.println("정보를 불러오는데 실패했습니다.");
+        }
+    }
+    
+    // [회원 가입]
     private static void registerMember() {
-        System.out.println("아이디:");
-        String id = scanner.nextLine();
-        System.out.println("비밀번호:");
-        String password = scanner.nextLine();
-        System.out.println("이름:");
-        String memberName = scanner.nextLine();
-        System.out.println("전화번호:");
-        String tel = scanner.nextLine();
-        System.out.println("주소:");
-        String address = scanner.nextLine();
-        System.out.println("성별 (M/F):");
-        String sex = scanner.nextLine();
+        String id = getInput("아이디:");
+        String password = getInput("비밀번호:");
+        String memberName = getInput("이름:");
+        String tel = getInput("전화번호:");
+        String address = getInput("주소:");
+        String sex = getInput("성별 (M/F):");
 
-        //입력값을 DTO객체에게 전달
+
         UnifiedDTO member = new UnifiedDTO();
         member.setId(id);
         member.setPassword(password);
@@ -76,22 +98,32 @@ public class Main {
         member.setTel(tel);
         member.setAddress(address);
         member.setSex(sex);
-        //DTO는 Controller 호출
         controller.registerMember(member);
     }
-
-    //로그인
+    //[ 2번- 유저 메뉴 ]
+    private static void showUserMenu(){
+        System.out.println("1. 나의 정보 확인");
+        System.out.println("2. 게시물 목록");
+        System.out.println("3. 회원 목록(관리자인 경우)");
+        System.out.println("4. 로그아웃");
+        System.out.println("5. 종료");
+        System.out.print("선택: ");
+    }
+    // 로그인
     private static void loginMember() {
         System.out.println("<<<로그인>>>");
-        System.out.print("아이디:");
-        String id = scanner.nextLine();
-        System.out.print("비밀번호:");
-        String password = scanner.nextLine();
-    
+        String id = getInput("아이디:");
+        String password = getInput("비밀번호:");
         try {
             String memberName = controller.login(id, password);
             if (memberName != null) {
-                System.out.println("로그인 성공: " + memberName + "님 환영합니다.");
+                isAdmin = controller.isAdmin(id); // 관리자인지 확인하여 isAdmin 변수 설정
+                if (isAdmin) {
+                    System.out.println("관리자 로그인 성공: " + memberName + "님 환영합니다.");
+                } else {
+                    System.out.println("로그인 성공: " + memberName + "님 환영합니다.");
+                }
+                loggedInUserId = id; // 로그인된 사용자 ID 설정
             } else {
                 System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
             }
@@ -99,62 +131,89 @@ public class Main {
             e.printStackTrace();
         }
     }
-    //로그인 - PL/SQL 함수 호출
-    public String loginMember(String id, String password) {
-        String memberName = null;
-        String sql = "{ ? = call login_member(?, ?) }";  // PL/SQL 함수 호출
-
-        try (CallableStatement cstmt = conn.prepareCall(sql)) {
-            // 출력 파라미터 설정
-            cstmt.registerOutParameter(1, Types.VARCHAR);
-
-            // 입력 파라미터 설정
-            cstmt.setString(2, id);
-            cstmt.setString(3, password);
-
-            // 함수 실행
-            cstmt.execute();
-
-            // 출력 파라미터 값 가져오기
-            memberName = cstmt.getString(1);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return memberName;
+    
+    // 로그아웃
+    private static void logout() {
+        controller.logout(loggedInUserId);
+        loggedInUserId = null; // 로그아웃 후 로그인 상태 초기화
+        isAdmin = false; // 관리자 상태 초기화
+        System.out.println("로그아웃되었습니다.");
     }
-  
+    //아이디찾기
     private static String findMemberId() {
-        System.out.println("아이디를 찾기 위해 이름/비밀번호/전화번호를 입력하세요:");
-        System.out.print("이름:");
-        String memberName = scanner.nextLine();
-        System.out.print("비밀번호:");
-        String password = scanner.nextLine();
-        System.out.print("전화번호:");
-        String tel = scanner.nextLine();
-        
+        String memberName = getInput("이름:");
+        String password = getInput("비밀번호:");
+        String tel = getInput("전화번호:");
         try {
-            String memberId = controller.findMemberId(memberName, password, tel); 
+            String memberId = controller.findMemberId(memberName, password, tel);
             if (memberId != null) {
                 System.out.println("아이디 찾기 성공: " + memberId);
-                return memberId; // 아이디를 반환
+                return memberId;
             } else {
                 System.out.println("아이디 찾기 실패: 이름 또는 전화번호를 확인하세요.");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        return null; // 실패 시 null 반환
+        return null;
     }
- // 비밀번호 초기화
- private static void resetPassword() {
-    System.out.println("아이디:");
-    String id = scanner.nextLine();
-    System.out.println("새 비밀번호:");
-    String newPassword = scanner.nextLine();
+    
+    // 비밀번호 초기화
+    private static void resetPassword() {
+        String id = getInput("아이디:");
+        String newPassword = getInput("새 비밀번호:");
+        controller.resetPassword(id, newPassword);
+    }
+    // 프로그램 종료 : 스캐너 close 후 DB커넥션 해제 후 종료
+    private static void programExit() {
+        System.out.println("프로그램을 종료합니다");
+        scanner.close();
+        try {
+            conn.close(); // DB 연결 해제
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private static void getAllBoards() {
+        List<UnifiedDTO> boardList = controller.getAllBoards(); // Controller에서 데이터 가져오기
+        if (boardList == null || boardList.isEmpty()) {
+            System.out.println("게시물이 없습니다.");
+            return;
+        }
+        System.out.println("게시물 목록:");
+        System.out.println("------------------------------------");
+        for (UnifiedDTO board : boardList) {
+            System.out.println("글 번호: " + board.getIdx());
+            System.out.println("제목: " + board.getTitle());
+            System.out.println("작성자: " + board.getWriter());
+            System.out.println("조회수: " + board.getViewCnt());
+            System.out.println("작성일: " + board.getInsertDate());
+            System.out.println("------------------------------------");
+        }
+    }
+    /* 관리자 기능 : 모든 회원 조회 */
+    private static void showMemberAll() {
+        List<UnifiedDTO> memberList = controller.showMemberAll(); // Controller 클래스의 showMemberList 호출
+    
+        if (memberList == null || memberList.isEmpty()) {
+            System.out.println("회원 목록이 없습니다.");
+            return;
+        }
 
-    controller.resetPassword(id, newPassword);
+    System.out.println("회원 목록:");
+    System.out.println("------------------------------------");
+    for (UnifiedDTO member : memberList) {
+        System.out.println("아이디: " + member.getId());
+        System.out.println("이름: " + member.getMemberName());
+        System.out.println("전화번호: " + member.getTel());
+        System.out.println("주소: " + member.getAddress());
+        System.out.println("성별: " + member.getSex());
+        System.out.println("------------------------------------");
+    }
+}
+    //공통 입력처리 함수 : 받은 문자열 출력후 스캐너입력을 대기한다.
+    private static String getInput(String prompt) {
+        System.out.print(prompt);
+        return scanner.nextLine();
     }
 }
