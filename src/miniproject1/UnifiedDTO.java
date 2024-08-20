@@ -8,17 +8,20 @@ public class UnifiedDTO  {
     private String content;
     private String writer;
     private int viewCnt;
-    private String deleteYn;
     private Date insertDate;
     private Date updateDate;
     private Date deleteDate;
     // MemberInfo 테이블 관련 필드
     private String id;
     private String password;
-    private String member_Name;
+    private String memberName;
     private String tel;
     private String address;
     private String sex;
+    private String deleteYn;
+    private String isAdmin;
+
+    
     // MEMLOG 테이블 관련 필드
     private Timestamp loginDate;
     private Timestamp logoutDate;
@@ -88,7 +91,7 @@ public class UnifiedDTO  {
         return password;
     }
     public String getMemberName() {
-        return member_Name;
+        return memberName;
     }
     public String getTel() {
         return tel;
@@ -99,6 +102,11 @@ public class UnifiedDTO  {
     public String getSex() {
         return sex;
     }
+
+    public String getIsAdmin() {
+        return this.isAdmin;
+    }
+    
     //  MemberInfo 테이블 Setters 
     public void setId(String id) {
         this.id = id;
@@ -106,8 +114,8 @@ public class UnifiedDTO  {
     public void setPassword(String password) {
         this.password = password;
     }
-    public void setMemberName(String member_Name) {
-        this.member_Name = member_Name;
+    public String setMemberName(String memberName) {
+        return this.memberName = memberName;
     }
     public void setTel(String tel) {
         this.tel = tel;
@@ -117,6 +125,10 @@ public class UnifiedDTO  {
     }
     public void setSex(String sex) {
         this.sex = sex;
+    }
+    
+    public void setIsAdmin(String isAdmin) {
+        this.isAdmin = isAdmin;
     }
 //-----------------------------------------------------------------------------//
      // MEMLOG 테이블 Getter , Setter
@@ -133,5 +145,6 @@ public void setLogoutDate(Timestamp logoutDate) {
     this.logoutDate = logoutDate;
 }
 //-----------------------------------------------------------------------------//
+
 
 }

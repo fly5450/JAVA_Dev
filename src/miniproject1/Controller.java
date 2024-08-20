@@ -20,12 +20,13 @@ public class Controller {
     }
 
     // [로그인]
-    public String login(String id, String password) throws Exception {
-        String result = service.login(id, password);
+    public UnifiedDTO login(String id, String password) throws Exception {
+        UnifiedDTO result = service.login(id, password);
         if (result != null) {
-            System.out.println("로그인 성공: " +  id+ "님 환영합니다."); 
+            System.out.println("로그인 성공: " + result.getId() + "<<" + result.getMemberName() + ">>" + "님 환영합니다.");
             return result;
         } else {
+            System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
             return null;
         }
     }
@@ -96,26 +97,43 @@ public class Controller {
         }
     }
     // [게시물 삭제]
-    public void deleteBoard(int idx) {
-        int result = service.deleteBoard(idx);
-            if ( result > 0) {
-                System.out.println("게시물이 성공적으로 삭제되었습니다."); 
-                }
-                else {
-                    System.out.println("게시물 삭제에 실패했습니다.");
-                }
-            }
-    // [게시글 수정]
-    public void updateBoard(int boardId, String newTitle, String newContent) {
-        service.updateBoard(boardId, newTitle, newContent);
+    public boolean deleteBoard(int boardId) {
+        UnifiedDTO board = service.getBoardById(boardId);
+
+        if (board == null) {
+            System.out.println("게시글이 존재하지 않습니다.");
+            return false; // 게시글이 없을 경우 false 반환
+        }
+
+        return service.deleteBoard(boardId);
     }
+    // [게시물 수정]
+    public boolean updateBoard(UnifiedDTO updatedBoard) {
+        UnifiedDTO board = service.getBoardById(updatedBoard.getIdx());
+
+        if (board == null) {
+            System.out.println("게시글이 존재하지 않습니다.");
+            return false; // 게시글이 없을 경우 false 반환
+        }
+
+        boolean result = service.updateBoard(updatedBoard);
+        if (result) {
+            System.out.println("게시글이 성공적으로 수정되었습니다.");
+        } else {
+            System.out.println("게시글 수정에 실패했습니다.");
+        }
+        return result;
+    }
+    // [게시물 조회]
+    public UnifiedDTO getBoardById(int no) {
+        return service.getBoardById(no);
+        }
+    
     // 데이터베이스에서 memberId에 해당하는 사용자가 관리자인지 확인하는 로직
     public boolean isAdmin(String memberId) {
         return service.checkAdminStatus(memberId);
         }
-    public UnifiedDTO getBoardById(int no) {
-        return service.getBoardById(no);
-        }
+
     public void incrementViewCount(int no) {
         service.incrementViewCount(no);
     }

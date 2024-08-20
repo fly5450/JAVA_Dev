@@ -156,23 +156,15 @@ public class Main {
         String id = getInput("아이디:");
         String password = getInput("비밀번호:");
         try {
-            String memberName = controller.login(id, password);
-            if (memberName != null) {
-                isAdmin = controller.isAdmin(id); // 관리자인지 확인하여 isAdmin 변수 설정
-                if (isAdmin) {
-                    System.out.println("관리자 로그인 성공: " + memberName + "님 환영합니다.");
-                } else {
-                    System.out.println("로그인 성공: " + memberName + "님 환영합니다.");
-                }
-                loggedInUserId = id; // 로그인된 사용자 ID 설정
-            } else {
-                System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
+            UnifiedDTO member = controller.login(id, password);
+            if (member != null) {
+                isAdmin = "Y".equals(member.getIsAdmin()); // 관리자인지 확인
+                loggedInUserId = member.getId();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
     // 로그아웃
     private static void logout() {
         controller.logout(loggedInUserId);
@@ -287,18 +279,44 @@ private static void boardView() {
     }
     // 게시글 삭제
     private static void deleteBoard() {
-        int boardId = Integer.parseInt(getInput("삭제할 게시물 번호를 입력하세요: "));
-        controller.deleteBoard(boardId);
-        System.out.println("게시물이 삭제되었습니다.");
+        int boardId = getInputInt("삭제할 게시글 번호를 입력하세요: ");
+        UnifiedDTO board = controller.getBoardById(boardId);
+    
+        if (board == null) {
+            System.out.println("게시글이 존재하지 않습니다.");
+            return; // 이전 화면으로 돌아가기
+        }
+    
+        boolean result = controller.deleteBoard(boardId);
+        if (result) {
+            System.out.println("게시글이 성공적으로 삭제되었습니다.");
+        } else {
+            System.out.println("게시글 삭제에 실패했습니다.");
+        }
     }
 
     // 게시글 수정
     private static void updateBoard() {
-        int boardId = Integer.parseInt(getInput("수정할 게시물 번호를 입력하세요: "));
-        String newTitle = getInput("새로운 제목: ");
-        String newContent = getInput("새로운 내용: ");
-        controller.updateBoard(boardId, newTitle, newContent);
-        System.out.println("게시물이 수정되었습니다.");
+        int boardId = getInputInt("수정할 게시글 번호를 입력하세요: ");
+        UnifiedDTO board = controller.getBoardById(boardId);
+    
+        if (board == null) {
+            System.out.println("게시글이 존재하지 않습니다.");
+            return; // 이전 화면으로 돌아가기
+        }
+    
+        String newTitle = getInput("새로운 제목을 입력하세요: ");
+        String newContent = getInput("새로운 내용을 입력하세요: ");
+        
+        board.setTitle(newTitle);
+        board.setContent(newContent);
+    
+        boolean result = controller.updateBoard(board);
+        if (result) {
+            System.out.println("게시글이 성공적으로 수정되었습니다.");
+        } else {
+            System.out.println("게시글 수정에 실패했습니다.");
+        }
     }
     /* 관리자 기능 : 모든 회원 조회 */
     private static void showMemberAll() {
@@ -345,7 +363,17 @@ private static void Boards() {
         System.out.print(prompt);
         return scanner.nextLine();
     }
-
+    // 공통 입력처리 함수 : 받은 문자열 출력 후 받은 문자열을 정수형으로 변환하여 반환.
+    private static int getInputInt(String prompt) {
+        while (true) {
+            try {
+                System.out.print(prompt);
+                return Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("유효한 숫자를 입력하세요.");
+            }
+        }
+    }
     private static void isAdmin(){
         isAdmin = true;
         System.out.println("관리자 모드로 전환되었습니다.");

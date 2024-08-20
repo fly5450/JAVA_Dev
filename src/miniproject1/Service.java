@@ -3,6 +3,7 @@ import java.util.List;
 
 public class Service { //UnifiedDAO 클래스를 호출하여 실제 데이터베이스 작업을 처리 
     private UnifiedDAO unifiedDAO;
+    public String memberName;
 
     public Service(Connection conn) {
         this.unifiedDAO = new UnifiedDAO(conn);
@@ -13,11 +14,11 @@ public class Service { //UnifiedDAO 클래스를 호출하여 실제 데이터�
         return unifiedDAO.registerMember(member);
     }
     // 로그인
-    public String login(String id, String password) {
+    public UnifiedDTO login(String id, String password) {
         return unifiedDAO.login(id, password);
     }
     // 로그아웃
-    public String logout(String id, String password) {
+    public UnifiedDTO logout(String id, String password) {
         return unifiedDAO.login(id, password);
     }
     // 아이디 찾기
@@ -50,41 +51,39 @@ public class Service { //UnifiedDAO 클래스를 호출하여 실제 데이터�
     public void incrementViewCount(int no) {
         unifiedDAO.incrementViewCount(no);
     }
-   
- 
     // 게시글 추가
     public int insertBoard(UnifiedDTO board) {
         return unifiedDAO.insertBoard(board);
     }
      // 게시글 삭제
-    public int deleteBoard(int idx) {
-        return unifiedDAO.deleteBoard(idx);
+    public boolean deleteBoard(int idx) {
+        int rowsAffected = unifiedDAO.deleteBoard(idx);
+        return rowsAffected > 0; // 성공적으로 삭제된 경우 true 반환
     }
-    public void updateBoard(int boardId, String newTitle, String newContent) {
-        unifiedDAO.updateBoard(boardId, newTitle, newContent);
+      // [게시물 수정]
+      public boolean updateBoard(UnifiedDTO updatedBoard) {
+        return unifiedDAO.updateBoard(updatedBoard) > 0;
     }
+
     //회원탈퇴시 memberinfo테이블 Yn필드변경
     public boolean setDeleteYn(String memberId, boolean deleteYn) {
         return unifiedDAO.setDeleteYn(memberId, deleteYn);
     }
-    // 게시글 수정
-    public int updateBoard(UnifiedDTO board) {
-        return unifiedDAO.updateBoard(board);
-    }
+
   
     /* 
     로그인 시 loginLogRecord 메서드를 호출하여 로그아웃 시간을 기록함. */
     // 로그인 log기록
-     public String loginLogRecord(String id, String password) {
-        String member = login(id, password);
+     public UnifiedDTO loginLogRecord(String id, String password) {
+        UnifiedDTO member = login(id, password);
         if (member != null) {
-            unifiedDAO.recordLoginTo(id); // 로그인 이력 기록
+            unifiedDAO.recordLogin(id); // 로그인 이력 기록
         }
         return member;
     }
         //  로그아웃 시 log기록, LOG 테이블과 MemberInfo 테이블에 로그아웃 시간을 기록
      public void recordLogoutToTable(String memberId) {
-        unifiedDAO.recordLogoutTo(memberId); // 로그아웃 이력 기록, recordLogout 메서드를 통해 두 테이블에 로그아웃 시간을 업데이트
+        unifiedDAO.recordLogout(memberId); // 로그아웃 이력 기록, recordLogout 메서드를 통해 두 테이블에 로그아웃 시간을 업데이트
     }
     public boolean checkAdminStatus(String memberId) {
         // 관리자 여부를 확인하는 쿼리를 실행

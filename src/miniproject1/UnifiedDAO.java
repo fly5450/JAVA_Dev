@@ -47,7 +47,7 @@ public int registerMember(UnifiedDTO member) {
         return pstmt.executeUpdate();
     } catch (SQLException e) {
         if (e.getErrorCode() == 1) { // ORA-00001: unique constraint violated
-            System.out.println("이미 가입된 아이디입니다. 다른 아이디를 사용하세요.");
+            System.out.println("가입불가!!");
         } else {
             e.printStackTrace();
             System.out.println(e.getErrorCode());
@@ -56,7 +56,7 @@ public int registerMember(UnifiedDTO member) {
     }
 }
  // [로그인]
- public String login(String id, String password) {
+ public UnifiedDTO  login(String id, String password) {
     String sql = "SELECT * FROM MemberInfo WHERE ID = ? AND PASSWORD = ?";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, id);
@@ -73,8 +73,8 @@ public int registerMember(UnifiedDTO member) {
             member.setAddress(rs.getString("ADDRESS"));
             member.setSex(rs.getString("SEX"));
             
-            // 로그인 성공 시 사용자의 이름을 반환함.
-            return member.getMemberName();
+            // 로그인 성공 시 사용자 객체반환
+            return member;
         } else {
             // 로그인 실패 시 null 반환
             return null;
@@ -87,9 +87,9 @@ public int registerMember(UnifiedDTO member) {
 
     //---------------------------------------------------------------------------------------------------------------------------//
 // 로그인 시 로그 기록 및 회원 테이블에 로그인 시간 업데이트
-  public void recordLoginTo(String memberId) {
-    String sqlLog = "INSERT INTO MEMLOG (id, loginDate) VALUES (?, ?)";
-    String sqlUpdateMember = "UPDATE MemberInfo SET lastLoginDate = ? WHERE id = ?";
+public void recordLogin(String memberId) {
+    String sqlLog = "INSERT INTO MemberLog (id, login_date) VALUES (?, ?)";
+    String sqlUpdateMember = "UPDATE MemberInfo SET last_login_date = ? WHERE id = ?";
     Timestamp now = new Timestamp(System.currentTimeMillis());
 
     try (PreparedStatement pstmtLog = conn.prepareStatement(sqlLog);
@@ -105,28 +105,26 @@ public int registerMember(UnifiedDTO member) {
         e.printStackTrace();
     }
 }
- // 로그아웃 시 로그아웃 시간 기록 recordLogout 메서드를 통해 두 테이블에 로그아웃 시간을 업데이트
- public void recordLogoutTo(String memberId) {
-    String sql = "UPDATE MEMLOG SET logoutDate = ? WHERE id = ? AND logoutDate IS NULL";
+ // 로그아웃 시 이력 기록 및 회원 테이블 업데이트
+ public void recordLogout(String memberId) {
+    String sqlLog = "UPDATE MemberLog SET logout_date = ? WHERE id = ? AND logout_date IS NULL";
+    String sqlUpdateMember = "UPDATE MemberInfo SET last_logout_date = ? WHERE id = ?";
     Timestamp now = new Timestamp(System.currentTimeMillis());
-    try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-        pstmt.setTimestamp(1, now);
-        pstmt.setString(2, memberId);
-        pstmt.executeUpdate();
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
 
-    String sql2 = "UPDATE MEMBERINFO SET logoutDate = ? WHERE id = ? AND logoutDate IS NULL";
-    Timestamp now2 = new Timestamp(System.currentTimeMillis());
-    try (PreparedStatement pstmt = conn.prepareStatement(sql2)) {
-        pstmt.setTimestamp(1, now2);
-        pstmt.setString(2, memberId);
-        pstmt.executeUpdate();
+    try (PreparedStatement pstmtLog = conn.prepareStatement(sqlLog);
+         PreparedStatement pstmtMember = conn.prepareStatement(sqlUpdateMember)) {
+        pstmtLog.setTimestamp(1, now);
+        pstmtLog.setString(2, memberId);
+        pstmtLog.executeUpdate();
+
+        pstmtMember.setTimestamp(1, now);
+        pstmtMember.setString(2, memberId);
+        pstmtMember.executeUpdate();
     } catch (SQLException e) {
         e.printStackTrace();
     }
 }
+
 //---------------------------------------------------------------------------------------------------------------------------//
   // 아이디 찾기
 //   public String findMemberId(String id,String password, String tel) {
@@ -247,24 +245,7 @@ public int registerMember(UnifiedDTO member) {
             return 0;
         }
     }
-    // [게시물 수정]
-    public void updateBoard(int boardId, String newTitle, String newContent) {
-        String sql = "UPDATE board SET title = ?, content = ?, update_date = SYSDATE WHERE idx = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, newTitle);
-            pstmt.setString(2, newContent);
-            pstmt.setInt(3, boardId);
-            int rowsAffected = pstmt.executeUpdate();
-    
-            if (rowsAffected > 0) {
-                System.out.println("게시물이 성공적으로 수정되었습니다.");
-            } else {
-                System.out.println("게시물 수정에 실패했습니다. 게시물 번호를 확인하세요.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+
      // 게시물 상세보기
      public UnifiedDTO boardView(int idx) {
         String sql = "SELECT * FROM board WHERE idx = ?";
@@ -299,6 +280,7 @@ public int registerMember(UnifiedDTO member) {
             e.printStackTrace();
         }
     }
+    //행넘버 조회
     public UnifiedDTO getBoardById(int no) {
         String sql = "SELECT * FROM board WHERE idx = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
