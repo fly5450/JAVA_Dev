@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
-//User - View
+//User (View)
 public class Main {
     private static Connection conn; // Connection 객체 선언
     private static Controller controller; //Controller 객체 선언
@@ -25,14 +25,14 @@ public class Main {
             if (loggedInUserId == null) {
                 showMainMenu();
                 int choice = scanner.nextInt();
-                scanner.nextLine(); // 입력버퍼 클리어
+                scanner.nextLine();                 // 입력버퍼 클리어
                 switch (choice) {
-                    case 1 -> registerMember();
-                    case 2 -> loginMember();
-                    case 3 -> findMemberId();
-                    case 4 -> resetPassword();
-                    case 5 -> {  programExit();}
-                    case 666 -> { isAdmin = true;  System.out.println("관리자 모드로 전환되었습니다."); showMainMenu(); }
+                    case 1 -> registerMember();         // 1. 회원가입 - 회원정보 입력
+                    case 2 -> loginMember();            // 2. 로그인
+                    case 3 -> findMemberId();           // 3. 아이디 찾기
+                    case 4 -> resetPassword();          //4.  비밀번호 초기화
+                    case 5 -> programExit();            // 5. 종료
+                    case 666 -> isAdmin();                  // 히든메뉴 관리자모드
                     default -> System.out.println("올바른 번호를 선택하세요.");
                 }
             } else {
@@ -40,29 +40,34 @@ public class Main {
                 int choice = scanner.nextInt();
                 scanner.nextLine(); // 입력버퍼 클리어
                 switch (choice) {
-                    case 1 -> showMyInfo(); //1.나의정보보기
-                    case 2 -> insertBoard();
-                    case 3 -> { //2. 게시물 목록  
-                        getAllBoards(); // 게시물 목록 조회
-                        boardView(); }// 게시물 상세보기
-                    case 4 -> {             //3. 회원 목록(관리자인경우)
-                        if (isAdmin) {showMemberAll();}
-                        else { System.out.println("접근 권한이 없습니다."); }}
-                    case 5 -> logout(); //4. 로그아웃
-                    case 6 -> secession(); //5. 회원탈퇴
-                    case 7 -> { logout(); programExit(); } //6. 종료(선로그아웃)
+                    case 1 -> showMyInfo();             //1. 나의 정보 보기
+                    case 2 -> insertBoard();            //2. 게시글 등록
+                    case 3 -> Boards();          //3. 게시글 목록 조회
+                    case 4 -> { //4. 회원 목록(관리자인 경우)
+                        if (isAdmin) {  showMemberAll(); }
+                        else {  System.out.println("접근 권한이 없습니다."); }
+                    }
+                    case 5 -> logout(); //5. 로그아웃
+                    case 6 -> secession(); //6. 회원탈퇴
+                    case 7 -> {
+                        logout();
+                        programExit(); //7. 종료(선 로그아웃)
+                    }
                     default -> System.out.println("올바른 번호를 선택하세요.");
                 }
             }
         }
     }
-    //[회원탈퇴]
-    private static void secession() {
-        System.out.println("회원탈퇴를 진행합니다. ");
-        String memberId = getInput("아이디 : ");
-        String pass = getInput("비밀번호 : ");
-        String certpass = getInput("비밀번호 확인 : ");
-        controller.deleteMember(memberId, pass, certpass);
+      // [유저 메뉴 ]
+      private static void showUserMenu(){
+        System.out.println("1. 나의 정보 확인");
+        System.out.println("2. 게시글 등록");
+        System.out.println("3. 게시판 보기");
+        System.out.println("4. 회원 목록(관리자전용 메뉴)");
+        System.out.println("5. 로그아웃");
+        System.out.println("6. 회원탈퇴");
+        System.out.println("7. 종료");
+        System.out.print("선택: ");
     }
     // [메인메뉴 출력]
     private static void showMainMenu() {
@@ -72,6 +77,14 @@ public class Main {
             System.out.println("4. 비밀번호 초기화");
             System.out.println("5. 종료");
             System.out.print("선택>>: ");
+    }
+    // [게시판 메뉴 출력]
+    private static void boardMenu(){
+        System.out.println("1. 게시글 상세보기");
+        System.out.println("2. 게시글 수정");
+        System.out.println("3. 게시글 삭제");
+        System.out.println("4. 돌아가기");
+        System.out.print("선택: ");
     }
     // [내정보보기]
     private static void showMyInfo() {
@@ -86,32 +99,56 @@ public class Main {
             System.out.println("정보를 불러오는데 실패했습니다.");
         }
     }
-    
     // [회원 가입]
-    private static void registerMember() {
-        String id = getInput("아이디:");
-        String password = getInput("비밀번호:");
-        String memberName = getInput("이름:");
-        String tel = getInput("전화번호:");
-        String address = getInput("주소:");
-        String sex = getInput("성별 (M/F):");
-        UnifiedDTO member = new UnifiedDTO();
-        member.setId(id);
-        member.setPassword(password);
-        member.setMemberName(memberName);
-        member.setTel(tel);
-        member.setAddress(address);
-        member.setSex(sex);
-        controller.registerMember(member);
+    private static void registerMember() {  
+        while (true) {
+            // 회원 정보 입력
+            String id = getInput("아이디:");
+            String password = getInput("비밀번호:");
+            String memberName = getInput("이름:");
+            String tel = getInput("전화번호:");
+            String address = getInput("주소:");
+            String sex = getInput("성별 (M/F):");
+            
+            // DTO에 회원 정보 설정
+            UnifiedDTO member = new UnifiedDTO();
+            member.setId(id);
+            member.setPassword(password);
+            member.setMemberName(memberName);
+            member.setTel(tel);
+            member.setAddress(address);
+            member.setSex(sex);
+    
+            // 회원 가입 메뉴 출력 및 선택
+            System.out.println("1. 가입");
+            System.out.println("2. 다시 입력");
+            System.out.println("3. 이전 화면으로");
+            System.out.print("선택: ");
+            int registerChoice = scanner.nextInt();
+            scanner.nextLine(); // 입력버퍼 클리어
+    
+            switch (registerChoice) {
+                case 1 -> {
+                    controller.registerMember(member); // 가입 확정
+                    return; // 함수 종료 (메인 메뉴로 돌아감)
+                }
+                case 2 -> System.out.println("다시 입력하세요."); // 다시 입력
+                case 3 -> {
+                    System.out.println("이전 화면으로 돌아갑니다.");
+                    return; // 함수 종료 (메인 메뉴로 돌아감)
+                }
+                default -> System.out.println("올바른 번호를 선택하세요.");
+            }
+        }
     }
-    //[유저로그인 메뉴 ]
-    private static void showUserMenu(){
-        System.out.println("1. 나의 정보 확인");
-        System.out.println("2. 게시물 목록");
-        System.out.println("3. 회원 목록(관리자인 경우)");
-        System.out.println("4. 로그아웃");
-        System.out.println("5. 종료");
-        System.out.print("선택: ");
+    
+    // [회원탈퇴]
+    private static void secession() {
+        System.out.println("회원탈퇴를 진행합니다. ");
+        String memberId = getInput("아이디 : ");
+        String pass = getInput("비밀번호 : ");
+        String certpass = getInput("비밀번호 확인 : ");
+        controller.deleteMember(memberId, pass, certpass);
     }
     // [로그인]
     private static void loginMember() {
@@ -178,14 +215,20 @@ public class Main {
     }
     
   // 게시물 상세보기
-  private static void boardView() {
+private static void boardView() {
+    List<UnifiedDTO> boardList = controller.getAllBoards(); // Controller에서 데이터 가져오기
+    if (boardList == null || boardList.isEmpty()) {
+        System.out.println("게시물이 없습니다.");
+        return;
+    }
     String strNo = getInput("상세보기를 원하는 게시물 번호?");
     try {
         final int no = Integer.parseInt(strNo);
         UnifiedDTO board = controller.getBoardById(no); // 게시물 조회
-        if (board != null) {
+        
+        if (board != null) { //게시글이 존재할 경우
             controller.incrementViewCount(no); // 조회수 1 증가
-            detailView(board); // 상세보기
+            detailView(board); // 상세보기 실행
         } else {
             System.out.println("게시물 번호가 존재하지 않습니다.");
         }
@@ -195,6 +238,7 @@ public class Main {
         e.printStackTrace();
     }
 }
+
      // 게시물 상세정보 출력
      private static void detailView(UnifiedDTO board) {
         System.out.println("게시물 번호: " + board.getIdx());
@@ -228,7 +272,7 @@ public class Main {
             System.out.println("------------------------------------");
         }
     }
-    //글쓰기
+    //게시글 등록
     private static void insertBoard() {
         String title = getInput("제목을 입력하세요: ");
         String content = getInput("내용을 입력하세요: ");
@@ -241,14 +285,14 @@ public class Main {
     
         controller.insertBoard(board);
     }
-    //글삭제
+    // 게시글 삭제
     private static void deleteBoard() {
         int boardId = Integer.parseInt(getInput("삭제할 게시물 번호를 입력하세요: "));
         controller.deleteBoard(boardId);
         System.out.println("게시물이 삭제되었습니다.");
     }
 
-    // 게시물 수정
+    // 게시글 수정
     private static void updateBoard() {
         int boardId = Integer.parseInt(getInput("수정할 게시물 번호를 입력하세요: "));
         String newTitle = getInput("새로운 제목: ");
@@ -276,9 +320,35 @@ public class Main {
         System.out.println("------------------------------------");
     }
 }
+private static void Boards() {
+    getAllBoards(); // 게시글 목록 조회
+
+    while (true) {
+        boardMenu(); // 게시글 관리 메뉴 출력
+        int boardMenuChoice = scanner.nextInt();
+        scanner.nextLine(); // 입력버퍼 클리어
+
+        switch (boardMenuChoice) {
+            case 1 -> boardView(); // 1. 게시글 상세보기
+            case 2 -> updateBoard(); // 2. 게시글 수정
+            case 3 -> deleteBoard(); // 3. 게시글 삭제
+            case 4 -> {
+                System.out.println("이전 메뉴로 돌아갑니다.");
+                return; // '돌아가기' 선택 시 함수 종료
+            }
+            default -> System.out.println("올바른 번호를 선택하세요.");
+        }
+    }
+}
     //공통 입력처리 함수 : 받은 문자열 출력후 스캐너입력을 대기한다.
     private static String getInput(String prompt) {
         System.out.print(prompt);
         return scanner.nextLine();
+    }
+
+    private static void isAdmin(){
+        isAdmin = true;
+        System.out.println("관리자 모드로 전환되었습니다.");
+        return ;
     }
 }

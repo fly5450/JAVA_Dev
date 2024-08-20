@@ -197,22 +197,26 @@ public int registerMember(UnifiedDTO member) {
 //---------------------------------------------------------------------------------------------------------------------------//
 // Board 테이블 관련 CRUD 메서드 | 등록, 조회, 수정, 삭제 |
   //[게시글 등록] 게시물 등록시 입력 항목 : 제목, 내용, 수정/삭제시 사용할 비밀번호으로 한다.
-  public  int insertBoard(UnifiedDTO board) {
-    String sql = "INSERT INTO board (title, content, writer, view_cnt, delete_yn, insert_date) "
-               + "VALUES (?, ?, ?, ?, ?, ?)";
+  public int insertBoard(UnifiedDTO board) {
+    String sql = "INSERT INTO board (title, content, writer, view_cnt, insert_date) "
+               + "VALUES (?, ?, ?, 0, ?)";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, board.getTitle());
         pstmt.setString(2, board.getContent());
         pstmt.setString(3, board.getWriter());
-        pstmt.setInt(4, board.getViewCnt());
-        pstmt.setString(5, board.getDeleteYn());
-        pstmt.setDate(6, new java.sql.Date(board.getInsertDate().getTime()));
+        
+        // insertDate가 null인 경우 현재 시간을 기본값으로 설정
+        if (board.getInsertDate() == null) {
+            board.setInsertDate(new java.sql.Date(System.currentTimeMillis()));
+        }
+        pstmt.setDate(4, new java.sql.Date(board.getInsertDate().getTime()));
+        
         return pstmt.executeUpdate();
     } catch (SQLException e) {
         e.printStackTrace();
         return 0;
-        }
     }
+}
 
    // [게시물 수정]
    public int updateBoard(UnifiedDTO board) {
@@ -363,14 +367,13 @@ public int registerMember(UnifiedDTO member) {
         return null;
     }
     //삭제여부필드 변경
-    public boolean setDeleteYn(String memberId, boolean deleteYn) {
-        String sql = "UPDATE MemberInfo SET delete_yn = ? WHERE id = ?";
+    public boolean setDeleteYn(String id, boolean deleteYn) {
+        String sql = "UPDATE MemberInfo SET deleteYn = ? WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, deleteYn ? "Y" : "N");  // `deleteYn`이 true인 경우 'Y', false인 경우 'N'
-            pstmt.setString(2, memberId);
-    
-            int updateRows = pstmt.executeUpdate();
-            return updateRows > 0;  // 업데이트된 행이 1개 이상이면 true 반환
+            pstmt.setString(1, "Y");
+            pstmt.setString(2, id);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -401,14 +404,14 @@ public int registerMember(UnifiedDTO member) {
     }
    
     //관리자ID인지 쿼리를 날려 확인하는 함수
-    public boolean isAdmin(String memberId) {
-        String sql = "SELECT role FROM MemberInfo WHERE id = ?";
+    public boolean isAdmin(String id) {
+        String sql = "SELECT isadminYn FROM MemberInfo WHERE ID = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, memberId);
+            pstmt.setString(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                String role = rs.getString("role");
-                return "admin".equalsIgnoreCase(role); // 'role'이 'admin'이면 true 반환
+                String isAdmin = rs.getString("isadminYn");
+                return "Y".equalsIgnoreCase(isAdmin); // 'Y'이면 관리자
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -50,7 +50,8 @@ public class Service { //UnifiedDAO 클래스를 호출하여 실제 데이터�
     public void incrementViewCount(int no) {
         unifiedDAO.incrementViewCount(no);
     }
-    
+   
+ 
     // 게시글 추가
     public int insertBoard(UnifiedDTO board) {
         return unifiedDAO.insertBoard(board);
