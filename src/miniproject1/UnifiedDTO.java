@@ -1,7 +1,31 @@
 import java.sql.Date;
 import java.sql.Timestamp;
 
-public class UnifiedDTO  {
+public class UnifiedDTO {
+ 
+
+    public UnifiedDTO() {
+        this.idx = idx;
+        this.title = title;
+        this.content = content;
+        this.writer = writer;
+        this.viewCnt = viewCnt;
+        this.insertDate = insertDate;
+        this.updateDate = updateDate;
+        this.deleteDate = deleteDate;
+        this.id = id;
+        this.password = password;
+        this.memberName = memberName;
+        this.tel = tel;
+        this.address = address;
+        this.sex = sex;
+        this.deleteYn = deleteYn;
+        this.isAdmin = isAdmin;
+        this.logid = logid;
+        this.login_Date = login_Date;
+        this.logout_Date = logout_Date;
+    }
+
     // Board 테이블 관련 필드
     private int idx;
     private String title;
@@ -11,6 +35,7 @@ public class UnifiedDTO  {
     private Date insertDate;
     private Date updateDate;
     private Date deleteDate;
+
     // MemberInfo 테이블 관련 필드
     private String id;
     private String password;
@@ -21,84 +46,107 @@ public class UnifiedDTO  {
     private String deleteYn;
     private String isAdmin;
 
-    
     // MEMLOG 테이블 관련 필드
-    private Timestamp loginDate;
-    private Timestamp logoutDate;
-//-----------------------------------------------------------------------------//
+    private String logid;
+    private Timestamp login_Date;
+    private Timestamp logout_Date;
+
+    //-----------------------------------------------------------------------------//
     // Board 테이블 : Getters 
     public int getIdx() {
         return idx;
     }
+
     public String getTitle() {
         return title;
     }
+
     public String getContent() {
         return content;
     }
+
     public String getWriter() {
         return writer;
     }
+
     public int getViewCnt() {
         return viewCnt;
     }
+
     public String getDeleteYn() {
         return deleteYn;
     }
+
     public Date getInsertDate() {
         return insertDate;
     }
+
     public Date getUpdateDate() {
         return updateDate;
     }
+
     public Date getDeleteDate() {
         return deleteDate;
     }
+
     // Board 테이블 : Setters 
     public void setIdx(int idx) {
         this.idx = idx;
     }
+
     public void setTitle(String title) {
         this.title = title;
     }
+
     public void setContent(String content) {
         this.content = content;
     }
+
     public void setWriter(String writer) {
         this.writer = writer;
     }
+
     public void setViewCnt(int viewCnt) {
         this.viewCnt = viewCnt;
     }
+
     public void setDeleteYn(String deleteYn) {
         this.deleteYn = deleteYn;
     }
+
     public void setInsertDate(Date insertDate) {
         this.insertDate = insertDate;
     }
+
     public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
     }
+
     public void setDeleteDate(Date deleteDate) {
         this.deleteDate = deleteDate;
     }
-//-----------------------------------------------------------------------------//
+    //-----------------------------------------------------------------------------//
     //  MemberInfo 테이블 Getters 
     public String getId() {
         return id;
     }
+
     public String getPassword() {
         return password;
     }
+
     public String getMemberName() {
         return memberName;
     }
+
     public String getTel() {
         return tel;
     }
+
     public String getAddress() {
         return address;
     }
+
     public String getSex() {
         return sex;
     }
@@ -106,45 +154,52 @@ public class UnifiedDTO  {
     public String getIsAdmin() {
         return this.isAdmin;
     }
-    
+
     //  MemberInfo 테이블 Setters 
     public void setId(String id) {
         this.id = id;
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
-    public String setMemberName(String memberName) {
-        return this.memberName = memberName;
+
+    public void setMemberName(String memberName) {
+        this.memberName = memberName;
     }
+
     public void setTel(String tel) {
         this.tel = tel;
     }
+
     public void setAddress(String address) {
         this.address = address;
     }
+
     public void setSex(String sex) {
         this.sex = sex;
     }
-    
+
     public void setIsAdmin(String isAdmin) {
         this.isAdmin = isAdmin;
     }
-//-----------------------------------------------------------------------------//
-     // MEMLOG 테이블 Getter , Setter
-public Timestamp getLoginDate() {
-    return loginDate;
-}
-public Timestamp getLogoutDate() {
-    return logoutDate;
-}
-public void setLoginDate(Timestamp loginDate) {
-    this.loginDate = loginDate;
-}
-public void setLogoutDate(Timestamp logoutDate) {
-    this.logoutDate = logoutDate;
-}
-//-----------------------------------------------------------------------------//
 
+    //-----------------------------------------------------------------------------//
+    // MEMLOG 테이블 Getter , Setter
+    public Timestamp getLoginDate() {
+        return login_Date;
+    }
 
+    public Timestamp getLogoutDate() {
+        return logout_Date;
+    }
+
+    public void setLoginDate(Timestamp login_Date) {
+        this.login_Date = login_Date;
+    }
+
+    public void setLogoutDate(Timestamp logout_Date) {
+        this.logout_Date = logout_Date;
+    }
+    //-----------------------------------------------------------------------------//
 }

@@ -87,7 +87,7 @@ public class Service { //UnifiedDAO 클래스를 호출하여 실제 데이터�
     }
     public boolean checkAdminStatus(String memberId) {
         // 관리자 여부를 확인하는 쿼리를 실행
-        return unifiedDAO.isAdmin(memberId);
+        return unifiedDAO.checkAdminStatus(memberId);
     }
     //관리자 기능 : 모든 멤버 조회 함수
     public List<UnifiedDTO> showMemberAll() {

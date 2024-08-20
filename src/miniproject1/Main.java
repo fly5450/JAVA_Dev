@@ -32,7 +32,7 @@ public class Main {
                     case 3 -> findMemberId();           // 3. 아이디 찾기
                     case 4 -> resetPassword();          //4.  비밀번호 초기화
                     case 5 -> programExit();            // 5. 종료
-                    case 666 -> isAdmin();                  // 히든메뉴 관리자모드
+                    case 666 -> checkAdminStatus();                  // 히든메뉴 관리자모드
                     default -> System.out.println("올바른 번호를 선택하세요.");
                 }
             } else {
@@ -269,14 +269,17 @@ private static void boardView() {
         String title = getInput("제목을 입력하세요: ");
         String content = getInput("내용을 입력하세요: ");
         String writer = getInput("작성자를 입력하세요: ");
+        String password = getInput("수정/삭제시 사용할 비밀번호를 입력하세요: ");
         
         UnifiedDTO board = new UnifiedDTO();
         board.setTitle(title);
         board.setContent(content);
         board.setWriter(writer);
-    
+        board.setPassword(password);
+        // board.setInsertDate(new Timestamp(insertDate)); // 현재 날짜와 시간으로 설정
         controller.insertBoard(board);
     }
+    
     // 게시글 삭제
     private static void deleteBoard() {
         int boardId = getInputInt("삭제할 게시글 번호를 입력하세요: ");
@@ -374,7 +377,7 @@ private static void Boards() {
             }
         }
     }
-    private static void isAdmin(){
+    private static void checkAdminStatus(){
         isAdmin = true;
         System.out.println("관리자 모드로 전환되었습니다.");
         return ;

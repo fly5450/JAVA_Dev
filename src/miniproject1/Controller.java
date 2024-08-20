@@ -49,24 +49,27 @@ public class Controller {
     }
     
     // [회원 탈퇴]
-  public void deleteMember(String memberId, String password, String certPassword) {
-    // 비밀번호 일치 여부 확인
-    if (!password.equals(certPassword)) {
-        System.out.println("비밀번호가 일치하지 않습니다. 다시 시도하세요.");
-        return;
-    }
-
-    // 현재 비밀번호 확인
-    String storedPassword = service.getPasswordById(memberId);
-    if (storedPassword != null && storedPassword.equals(password)) {
-        boolean success = service.setDeleteYn(memberId, true);
-        if (success) {
-            System.out.println("성공적으로 회원탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
-        } else {
-            System.out.println("회원 탈퇴에 실패했습니다. 다시 시도하세요.");
+    public void deleteMember(String memberId, String password, String certPassword) {
+    try {
+        if (!password.equals(certPassword)) {
+            System.out.println("비밀번호가 일치하지 않습니다. 다시 시도하세요.");
+            return;
         }
-    } else {
-        System.out.println("비밀번호가 일치하지 않습니다.");
+
+        String savedPassword = service.getPasswordById(memberId);
+        if (savedPassword != null && savedPassword.equals(password)) {
+            boolean success = service.setDeleteYn(memberId, true);
+            if (success) {
+                System.out.println("성공적으로 회원탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
+            } else {
+                System.out.println("회원 탈퇴에 실패했습니다. 다시 시도하세요.");
+            }
+        } else {
+            System.out.println("비밀번호가 일치하지 않습니다.");
+        }
+    } catch (Exception e) {
+        System.out.println("회원 탈퇴 중 오류가 발생했습니다. 잠시 후 다시 시도하세요.");
+        e.printStackTrace();
     }
 }
     // [비밀번호초기화]
@@ -130,7 +133,7 @@ public class Controller {
         }
     
     // 데이터베이스에서 memberId에 해당하는 사용자가 관리자인지 확인하는 로직
-    public boolean isAdmin(String memberId) {
+    public boolean checkAdminStatus(String memberId) {
         return service.checkAdminStatus(memberId);
         }
 

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 //  DB (Model)에 접근하여 쿼리 실행을 하는 객체.
 public class UnifiedDAO  {
+    UnifiedDTO DTO = new UnifiedDTO();
     public Connection conn;
 
     public UnifiedDAO(Connection conn) {
@@ -35,7 +36,7 @@ public class UnifiedDAO  {
 //MemberInfo 테이블 관련 CRUD 메서드-
 // [회원 가입]
 public int registerMember(UnifiedDTO member) {
-    String sql = "INSERT INTO MemberInfo (ID, PASSWORD, MEMBER_NAME, TEL, ADDRESS, SEX) " 
+    String sql = "INSERT INTO MemberInfo (ID, PASSWORD, MEMBERNAME, TEL, ADDRESS, SEX) " 
                + "VALUES (?, ?, ?, ?, ?, ?)";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, member.getId());
@@ -68,7 +69,7 @@ public int registerMember(UnifiedDTO member) {
             UnifiedDTO member = new UnifiedDTO();
             member.setId(rs.getString("ID"));
             member.setPassword(rs.getString("PASSWORD"));
-            member.setMemberName(rs.getString("MEMBER_NAME"));
+            member.setMemberName(rs.getString("MEMBERNAME"));
             member.setTel(rs.getString("TEL"));
             member.setAddress(rs.getString("ADDRESS"));
             member.setSex(rs.getString("SEX"));
@@ -196,30 +197,24 @@ public void recordLogin(String memberId) {
 // Board 테이블 관련 CRUD 메서드 | 등록, 조회, 수정, 삭제 |
   //[게시글 등록] 게시물 등록시 입력 항목 : 제목, 내용, 수정/삭제시 사용할 비밀번호으로 한다.
   public int insertBoard(UnifiedDTO board) {
-    String sql = "INSERT INTO board (title, content, writer, view_cnt, insert_date) "
-               + "VALUES (?, ?, ?, 0, ?)";
+    String sql = "INSERT INTO board (title, content, writer, viewcnt, insert_date, password) "
+               + "VALUES (?, ?, ?, 0, ?, ?)";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, board.getTitle());
         pstmt.setString(2, board.getContent());
         pstmt.setString(3, board.getWriter());
-        
-        // insertDate가 null인 경우 현재 시간을 기본값으로 설정
-        if (board.getInsertDate() == null) {
-            board.setInsertDate(new java.sql.Date(System.currentTimeMillis()));
-        }
-        pstmt.setDate(4, new java.sql.Date(board.getInsertDate().getTime()));
-        
+        pstmt.setDate(4, new java.sql.Date(System.currentTimeMillis())); // 현재 날짜 사용
+        pstmt.setString(5, board.getPassword());
         return pstmt.executeUpdate();
     } catch (SQLException e) {
         e.printStackTrace();
         return 0;
     }
 }
-
    // [게시물 수정]
    public int updateBoard(UnifiedDTO board) {
-    String sql = "UPDATE board SET title = ?, content = ?, writer = ?, view_cnt = ?, "
-               + "delete_yn = ?, update_date = ? WHERE idx = ?";
+    String sql = "UPDATE board SET title = ?, content = ?, writer = ?, viewcnt = ?, "
+               + "deleteyn = ?, update_date = ? WHERE idx = ?";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, board.getTitle());
         pstmt.setString(2, board.getContent());
@@ -258,8 +253,8 @@ public void recordLogin(String memberId) {
                 board.setTitle(rs.getString("title"));
                 board.setContent(rs.getString("content"));
                 board.setWriter(rs.getString("writer"));
-                board.setViewCnt(rs.getInt("view_cnt"));
-                // board.setDeleteYn(rs.getString("delete_yn"));
+                board.setViewCnt(rs.getInt("viewcnt"));
+                // board.setDeleteYn(rs.getString("deleteyn"));
                 board.setInsertDate(rs.getDate("insert_date"));
                 board.setUpdateDate(rs.getDate("update_date"));
                 // board.setDeleteDate(rs.getDate("delete_date"));
@@ -270,9 +265,10 @@ public void recordLogin(String memberId) {
         }
         return null; //게시글이 존재하지않을 경우 null 리턴
     }
+
     //게시글 조회시 ViewConut +1 증가
     public void incrementViewCount(int no) {
-        String sql = "UPDATE board SET view_cnt = view_cnt + 1 WHERE idx = ?";
+        String sql = "UPDATE board SET viewcnt = viewcnt + 1 WHERE idx = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, no);
             pstmt.executeUpdate();
@@ -292,10 +288,10 @@ public void recordLogin(String memberId) {
                     board.setTitle(rs.getString("title"));
                     board.setContent(rs.getString("content"));
                     board.setWriter(rs.getString("writer"));
-                    board.setViewCnt(rs.getInt("view_cnt"));
+                    board.setViewCnt(rs.getInt("viewcnt"));
                     board.setInsertDate(rs.getDate("insert_date"));
                     board.setUpdateDate(rs.getDate("update_date"));
-                    board.setDeleteYn(rs.getString("delete_yn"));
+                    board.setDeleteYn(rs.getString("deleteyn"));
                     return board;
                 }
             }
@@ -307,7 +303,7 @@ public void recordLogin(String memberId) {
     
     public List<UnifiedDTO> getAllBoards() {
         List<UnifiedDTO> boardList = new ArrayList<>();
-        String sql = "SELECT * FROM board";
+        String sql = "SELECT idx, title, content, writer, viewcnt, insert_date, update_date FROM board";
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
     
@@ -317,10 +313,10 @@ public void recordLogin(String memberId) {
                 board.setTitle(rs.getString("title"));
                 board.setContent(rs.getString("content"));
                 board.setWriter(rs.getString("writer"));
-                board.setViewCnt(rs.getInt("view_cnt"));
+                board.setViewCnt(rs.getInt("viewcnt"));
                 board.setInsertDate(rs.getDate("insert_date"));
                 board.setUpdateDate(rs.getDate("update_date"));
-                board.setDeleteYn(rs.getString("delete_yn"));
+                // board.setDeleteYn(rs.getString("deleteyn"));
                 boardList.add(board);
             }
         } catch (SQLException e) {
@@ -337,7 +333,7 @@ public void recordLogin(String memberId) {
             if (rs.next()) {
                 UnifiedDTO member = new UnifiedDTO();
                 member.setId(rs.getString("id"));
-                member.setMemberName(rs.getString("member_name"));
+                member.setMemberName(rs.getString("membername"));
                 member.setTel(rs.getString("tel"));
                 member.setAddress(rs.getString("address"));
                 member.setSex(rs.getString("sex"));
@@ -386,7 +382,7 @@ public void recordLogin(String memberId) {
     }
    
     //관리자ID인지 쿼리를 날려 확인하는 함수
-    public boolean isAdmin(String id) {
+    public boolean checkAdminStatus(String id) {
         String sql = "SELECT isadminYn FROM MemberInfo WHERE ID = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, id);
