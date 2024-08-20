@@ -1,6 +1,7 @@
 import java.sql.Connection;
 import java.util.List;
 
+// model과 view를 연결시켜주는 다리 역할, Model, View에게 직접 지시 가능
 public class Controller {
     private Service service;
 
@@ -76,14 +77,13 @@ public class Controller {
             System.out.println("비밀번호 초기화에 실패했습니다.");
         }
     }
-
+    // [내정보보기]
     public UnifiedDTO getMyInfo(String userId) {
         return service.getMemberById(userId); 
     }
     // [모든 게시물 조회]
     public List<UnifiedDTO> getAllBoards() {
-    List<UnifiedDTO> boardList = service.getAllBoards();
-    return boardList; 
+        return service.getAllBoards(); // Service 클래스의 getAllBoards() 호출
     }
 
     // [게시물 추가]
@@ -105,10 +105,21 @@ public class Controller {
                     System.out.println("게시물 삭제에 실패했습니다.");
                 }
             }
+    // [게시글 수정]
+    public void updateBoard(int boardId, String newTitle, String newContent) {
+        service.updateBoard(boardId, newTitle, newContent);
+    }
+    // 데이터베이스에서 memberId에 해당하는 사용자가 관리자인지 확인하는 로직
     public boolean isAdmin(String memberId) {
-        // 데이터베이스에서 memberId에 해당하는 사용자가 관리자인지 확인하는 로직
         return service.checkAdminStatus(memberId);
         }
+    public UnifiedDTO getBoardById(int no) {
+        return service.getBoardById(no);
+        }
+    public void incrementViewCount(int no) {
+        service.incrementViewCount(no);
+    }
+    
 
     
 }

@@ -1,7 +1,7 @@
 import java.sql.Connection;
 import java.util.List;
 
-public class Service {
+public class Service { //UnifiedDAO 클래스를 호출하여 실제 데이터베이스 작업을 처리 
     private UnifiedDAO unifiedDAO;
 
     public Service(Connection conn) {
@@ -36,10 +36,21 @@ public class Service {
      public UnifiedDTO getMemberById(String memberId) {
         return unifiedDAO.getMemberById(memberId);
     }
-    // 게시물 조회
-    public List<UnifiedDTO> getAllBoards() {
-        return unifiedDAO.getAllBoards();
+  
+    //게시글 상세보기
+    public UnifiedDTO getBoardById(int boardId) {
+        return unifiedDAO.getBoardById(boardId);
     }
+      // 게시물 목록조회
+      public List<UnifiedDTO> getAllBoards() {
+        return unifiedDAO.getAllBoards(); // UnifiedDAO의 getAllBoards() 호출
+    }
+    
+    // 조회수 증가
+    public void incrementViewCount(int no) {
+        unifiedDAO.incrementViewCount(no);
+    }
+    
     // 게시글 추가
     public int insertBoard(UnifiedDTO board) {
         return unifiedDAO.insertBoard(board);
@@ -47,6 +58,9 @@ public class Service {
      // 게시글 삭제
     public int deleteBoard(int idx) {
         return unifiedDAO.deleteBoard(idx);
+    }
+    public void updateBoard(int boardId, String newTitle, String newContent) {
+        unifiedDAO.updateBoard(boardId, newTitle, newContent);
     }
     //회원탈퇴시 memberinfo테이블 Yn필드변경
     public boolean setDeleteYn(String memberId, boolean deleteYn) {
@@ -80,9 +94,6 @@ public class Service {
         return unifiedDAO.showMemberAll();
     }
 
- 
-
-  
 
 }
 

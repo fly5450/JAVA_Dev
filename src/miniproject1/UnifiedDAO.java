@@ -214,7 +214,7 @@ public int registerMember(UnifiedDTO member) {
         }
     }
 
-   // [게시물수정]
+   // [게시물 수정]
    public int updateBoard(UnifiedDTO board) {
     String sql = "UPDATE board SET title = ?, content = ?, writer = ?, view_cnt = ?, "
                + "delete_yn = ?, update_date = ? WHERE idx = ?";
@@ -243,9 +243,26 @@ public int registerMember(UnifiedDTO member) {
             return 0;
         }
     }
-
-     // 게시물 조회 (단일)
-     public UnifiedDTO getBoard(int idx) {
+    // [게시물 수정]
+    public void updateBoard(int boardId, String newTitle, String newContent) {
+        String sql = "UPDATE board SET title = ?, content = ?, update_date = SYSDATE WHERE idx = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newTitle);
+            pstmt.setString(2, newContent);
+            pstmt.setInt(3, boardId);
+            int rowsAffected = pstmt.executeUpdate();
+    
+            if (rowsAffected > 0) {
+                System.out.println("게시물이 성공적으로 수정되었습니다.");
+            } else {
+                System.out.println("게시물 수정에 실패했습니다. 게시물 번호를 확인하세요.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+     // 게시물 상세보기
+     public UnifiedDTO boardView(int idx) {
         String sql = "SELECT * FROM board WHERE idx = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idx);
@@ -257,24 +274,57 @@ public int registerMember(UnifiedDTO member) {
                 board.setContent(rs.getString("content"));
                 board.setWriter(rs.getString("writer"));
                 board.setViewCnt(rs.getInt("view_cnt"));
-                board.setDeleteYn(rs.getString("delete_yn"));
+                // board.setDeleteYn(rs.getString("delete_yn"));
                 board.setInsertDate(rs.getDate("insert_date"));
                 board.setUpdateDate(rs.getDate("update_date"));
-                board.setDeleteDate(rs.getDate("delete_date"));
+                // board.setDeleteDate(rs.getDate("delete_date"));
                 return board;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return null; //게시글이 존재하지않을 경우 null 리턴
     }
-
-    // 게시물 목록 조회
+    //게시글 조회시 ViewConut +1 증가
+    public void incrementViewCount(int no) {
+        String sql = "UPDATE board SET view_cnt = view_cnt + 1 WHERE idx = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, no);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public UnifiedDTO getBoardById(int no) {
+        String sql = "SELECT * FROM board WHERE idx = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, no);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    UnifiedDTO board = new UnifiedDTO();
+                    board.setIdx(rs.getInt("idx"));
+                    board.setTitle(rs.getString("title"));
+                    board.setContent(rs.getString("content"));
+                    board.setWriter(rs.getString("writer"));
+                    board.setViewCnt(rs.getInt("view_cnt"));
+                    board.setInsertDate(rs.getDate("insert_date"));
+                    board.setUpdateDate(rs.getDate("update_date"));
+                    board.setDeleteYn(rs.getString("delete_yn"));
+                    return board;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // 게시물 번호가 존재하지 않을 경우
+    }
+    
     public List<UnifiedDTO> getAllBoards() {
         List<UnifiedDTO> boardList = new ArrayList<>();
         String sql = "SELECT * FROM board";
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
+    
             while (rs.next()) {
                 UnifiedDTO board = new UnifiedDTO();
                 board.setIdx(rs.getInt("idx"));
@@ -282,10 +332,9 @@ public int registerMember(UnifiedDTO member) {
                 board.setContent(rs.getString("content"));
                 board.setWriter(rs.getString("writer"));
                 board.setViewCnt(rs.getInt("view_cnt"));
-                board.setDeleteYn(rs.getString("delete_yn"));
                 board.setInsertDate(rs.getDate("insert_date"));
                 board.setUpdateDate(rs.getDate("update_date"));
-                board.setDeleteDate(rs.getDate("delete_date"));
+                board.setDeleteYn(rs.getString("delete_yn"));
                 boardList.add(board);
             }
         } catch (SQLException e) {
@@ -293,30 +342,8 @@ public int registerMember(UnifiedDTO member) {
         }
         return boardList;
     }
-//---------------------------------------------------------------------------------------------------------------------------//
-    // [관리자 기능: 모든 회원 목록 조회]
-    public List<UnifiedDTO> showMemberAll() {
-        List<UnifiedDTO> memberList = new ArrayList<>();
-        String sql = "SELECT id, member_name, tel, address, sex FROM MemberInfo";
-        
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                UnifiedDTO member = new UnifiedDTO();
-                member.setId(rs.getString("id"));
-                member.setMemberName(rs.getString("member_name"));
-                member.setTel(rs.getString("tel"));
-                member.setAddress(rs.getString("address"));
-                member.setSex(rs.getString("sex"));
-                memberList.add(member);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return memberList;
-    }
-    public UnifiedDTO getMemberById(String memberId) {
+     // 내정보보기
+     public UnifiedDTO getMemberById(String memberId) {
         String sql = "SELECT id, member_name, tel, address, sex FROM MemberInfo WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, memberId);
@@ -349,6 +376,30 @@ public int registerMember(UnifiedDTO member) {
             return false;
         }
     }
+//---------------------------------------------------------------------------------------------------------------------------//
+    // [관리자 기능: 모든 회원 목록 조회]
+    public List<UnifiedDTO> showMemberAll() {
+        List<UnifiedDTO> memberList = new ArrayList<>();
+        String sql = "SELECT id, member_name, tel, address, sex FROM MemberInfo";
+        
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                UnifiedDTO member = new UnifiedDTO();
+                member.setId(rs.getString("id"));
+                member.setMemberName(rs.getString("member_name"));
+                member.setTel(rs.getString("tel"));
+                member.setAddress(rs.getString("address"));
+                member.setSex(rs.getString("sex"));
+                memberList.add(member);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return memberList;
+    }
+   
     //관리자ID인지 쿼리를 날려 확인하는 함수
     public boolean isAdmin(String memberId) {
         String sql = "SELECT role FROM MemberInfo WHERE id = ?";
@@ -365,6 +416,5 @@ public int registerMember(UnifiedDTO member) {
         return false;
     }
 
-
-
+    
 }
