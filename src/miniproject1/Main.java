@@ -229,7 +229,7 @@ private static void boardView() {
     } catch (Exception e) {
         e.printStackTrace();
     }
-}
+} 
 
      // 게시물 상세정보 출력
      private static void detailView(UnifiedDTO board) {
