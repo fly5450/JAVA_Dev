@@ -34,21 +34,21 @@ public class UnifiedDTO {
         this.logid = logid;
     }
 
-    public Timestamp getLogin_Date() {
-        return this.login_Date;
-    }
+    // public Timestamp getLogin_Date() {
+    //     return this.login_Date;
+    // }
 
-    public void setLogin_Date(Timestamp login_Date) {
-        this.login_Date = login_Date;
-    }
+    // public void setLogin_Date(Timestamp login_Date) {
+    //     this.login_Date = login_Date;
+    // }
 
-    public Timestamp getLogout_Date() {
-        return this.logout_Date;
-    }
+    // public Timestamp getLogout_Date() {
+    //     return this.logout_Date;
+    // }
 
-    public void setLogout_Date(Timestamp logout_Date) {
-        this.logout_Date = logout_Date;
-    }
+    // public void setLogout_Date(Timestamp logout_Date) {
+    //     this.logout_Date = logout_Date;
+    // }
     private Date updateDate;
     private Date deleteDate;
 
@@ -229,12 +229,12 @@ public class UnifiedDTO {
         return logout_Date;
     }
 
-    public void setLoginDate(Timestamp login_Date) {
-        this.login_Date = login_Date;
+    public void setLoginDate(Timestamp last_login_Date) {
+        this.login_Date = last_login_Date;
     }
 
-    public void setLogoutDate(Timestamp logout_Date) {
-        this.logout_Date = logout_Date;
+    public void setLogoutDate(Timestamp last_logout_Date) {
+        this.logout_Date = last_logout_Date;
     }
     //-----------------------------------------------------------------------------//
 }

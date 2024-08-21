@@ -89,7 +89,7 @@ public int registerMember(UnifiedDTO member) {
     //---------------------------------------------------------------------------------------------------------------------------//
 // 로그인 시 로그 기록 및 회원 테이블에 로그인 시간 업데이트
 public void recordLogin(String memberId) {
-    String sqlLog = "INSERT INTO MemberLog (id, login_date) VALUES (?, ?)";
+    String sqlLog = "INSERT INTO MemberLog (id, last_login_date) VALUES (?, ?)";
     String sqlUpdateMember = "UPDATE MemberInfo SET last_login_date = ? WHERE id = ?";
     Timestamp now = new Timestamp(System.currentTimeMillis());
 
@@ -109,7 +109,7 @@ public void recordLogin(String memberId) {
 
    // 로그아웃 시 로그 기록 및 회원 테이블에 로그아웃 시간 업데이트
    public void recordLogout(String memberId) {
-    String sqlLog = "UPDATE MemberLog SET logout_date = ? WHERE id = ? AND logout_date IS NULL";
+    String sqlLog = "UPDATE MemberLog SET last_logout_date = ? WHERE id = ? AND last_logout_date IS NULL";
     String sqlUpdateMember = "UPDATE MemberInfo SET last_logout_date = ? WHERE id = ?";
     Timestamp now = new Timestamp(System.currentTimeMillis());
 
