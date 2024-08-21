@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 //  DB (Model)에 접근하여 쿼리 실행을 하는 객체.
 public class UnifiedDAO  {
-    UnifiedDTO DTOboard = new UnifiedDTO();
     public Connection conn;
 
     public UnifiedDAO(Connection conn) {
@@ -199,23 +198,29 @@ public void recordLogin(String memberId) {
     }
 }
    // [게시물 수정]
-   public int updateBoard(UnifiedDTO board) {
-    String sql = "UPDATE board SET title = ?, content = ?, writer = ?, viewcnt = ?, "
+  // [게시물 수정]
+public int updateBoard(UnifiedDTO board) {
+    String sql = "UPDATE board SET title = ?, content = ?, writer = ?, "
                + "update_date = ? WHERE idx = ?";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, board.getTitle());
         pstmt.setString(2, board.getContent());
         pstmt.setString(3, board.getWriter());
-        pstmt.setInt(4, board.getViewCnt());
-        // pstmt.setString(5, board.getDeleteYn());
-        // pstmt.setDate(5, new java.sql.Date(board.getUpdateDate().getTime()));
-        pstmt.setInt(6, board.getIdx());
+
+        // update_date가 null일 경우 현재 시간으로 설정
+        if (board.getUpdateDate() == null) {
+            pstmt.setDate(4, new java.sql.Date(System.currentTimeMillis()));
+        } else {
+            pstmt.setDate(4, new java.sql.Date(board.getUpdateDate().getTime()));
+        }
+
+        pstmt.setInt(5, board.getIdx());
         return pstmt.executeUpdate();
     } catch (SQLException e) {
         e.printStackTrace();
         return 0;
-        }
     }
+}
     // [게시물 삭제]
     public int deleteBoard(int idx) {
         String sql = "DELETE FROM board WHERE idx = ?";
@@ -235,17 +240,17 @@ public void recordLogin(String memberId) {
             pstmt.setInt(1, idx);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                UnifiedDTO board = new UnifiedDTO();
-                board.setIdx(rs.getInt("idx"));
-                board.setTitle(rs.getString("title"));
-                board.setContent(rs.getString("content"));
-                board.setWriter(rs.getString("writer"));
-                board.setViewCnt(rs.getInt("viewcnt"));
+                UnifiedDTO member = new UnifiedDTO();
+                member.setIdx(rs.getInt("idx"));
+                member.setTitle(rs.getString("title"));
+                member.setContent(rs.getString("content"));
+                member.setWriter(rs.getString("writer"));
+                member.setViewCnt(rs.getInt("viewcnt"));
                 // board.setDeleteYn(rs.getString("deleteyn"));
-                board.setInsertDate(rs.getDate("insert_date"));
-                board.setUpdateDate(rs.getDate("update_date"));
+                member.setInsertDate(rs.getDate("insert_date"));
+                member.setUpdateDate(rs.getDate("update_date"));
                 // board.setDeleteDate(rs.getDate("delete_date"));
-                return board;
+                return member;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -263,23 +268,23 @@ public void recordLogin(String memberId) {
             e.printStackTrace();
         }
     }
-    //행넘버 조회
+    //게시글 넘버 조회
     public UnifiedDTO getBoardById(int no) {
         String sql = "SELECT * FROM board WHERE idx = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, no);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    // UnifiedDTO board = new UnifiedDTO();
-                    DTOboard.setIdx(rs.getInt("IDX"));
-                    DTOboard.setTitle(rs.getString("TITLE"));
-                    DTOboard.setContent(rs.getString("CONTENT"));
-                    DTOboard.setWriter(rs.getString("WRITER"));
-                    DTOboard.setViewCnt(rs.getInt("VIEWCNT"));
-                    DTOboard.setInsertDate(rs.getDate("INSERT_DATE"));
-                    DTOboard.setUpdateDate(rs.getDate("UPDATE_DATE"));
+                    UnifiedDTO board = new UnifiedDTO();
+                    board.setIdx(rs.getInt("IDX"));
+                    board.setTitle(rs.getString("TITLE"));
+                    board.setContent(rs.getString("CONTENT"));
+                    board.setWriter(rs.getString("WRITER"));
+                    board.setViewCnt(rs.getInt("VIEWCNT"));
+                    board.setInsertDate(rs.getDate("INSERT_DATE"));
+                    board.setUpdateDate(rs.getDate("UPDATE_DATE"));
                     // board.setDeleteYn(rs.getString("DELETEYN"));
-                    return DTOboard;
+                    return board;
                 } else {
                     System.out.println("게시물 번호가 존재하지 않습니다: " + no); // 디버깅 출력 추가
                 }
