@@ -4,15 +4,14 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
-//User (View)
 public class Main {
-    private static Connection conn; // Connection 객체 선언
-    private static Controller controller; //Controller 객체 선언
+    private static Connection conn;
+    private static Controller controller;
     private static Scanner scanner = new Scanner(System.in);
-    private static String loggedInUserId = null; //프로그램 시작시 비로그인 상태
-    private static boolean isAdmin = false;  // 관리자 여부 체크
-    
-    public static void main(String[] args) throws Exception {
+    private static String loggedInUserId = null;
+    private static boolean isAdmin = false;
+
+    public static void main(String[] args) {
         try {
             conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "user01", "5450");
             controller = new Controller(conn);
@@ -20,73 +19,128 @@ public class Main {
             e.printStackTrace();
             return;
         }
-        
+
         while (true) {
             if (loggedInUserId == null) {
                 showMainMenu();
-                int choice = scanner.nextInt();
-                scanner.nextLine();                 // 입력버퍼 클리어
+                int choice = getInputInt("선택>>: ");
                 switch (choice) {
-                    case 1 -> registerMember();         // 1. 회원가입 - 회원정보 입력
-                    case 2 -> loginMember();            // 2. 로그인
-                    case 3 -> findMemberId();           // 3. 아이디 찾기
-                    case 4 -> resetPassword();          //4.  비밀번호 초기화
-                    case 5 -> programExit();            // 5. 종료
-                    case 666 -> checkAdminStatus();                  // 히든메뉴 관리자모드
+                    case 1 -> registerMember();
+                    case 2 -> loginMember();
+                    case 3 -> findMemberId();
+                    case 4 -> resetPassword();
+                    case 5 -> programExit();
+                    case 666 -> checkAdminStatus();
                     default -> System.out.println("올바른 번호를 선택하세요.");
                 }
             } else {
                 showUserMenu();
-                int choice = scanner.nextInt();
-                scanner.nextLine(); // 입력버퍼 클리어
+                int choice = getInputInt("선택: ");
                 switch (choice) {
-                    case 1 -> showMyInfo();             //1. 나의 정보 보기
-                    case 2 -> insertBoard();            //2. 게시글 등록
-                    case 3 -> Boards();                 //3. 게시글 목록 조회
-                    case 4 -> {                           //4. 회원 목록(관리자인 경우)
-                        if (isAdmin) {  showMemberAll(); }
-                        else {  System.out.println("접근 권한이 없습니다."); }
+                    case 1 -> showMyInfo();
+                    case 2 -> insertBoard();
+                    case 3 -> manageBoards();
+                    case 4 -> {
+                        if (isAdmin) {
+                            showMemberAll();
+                        } else {
+                            System.out.println("접근 권한이 없습니다.");
+                        }
                     }
-                    case 5 -> logout();                 //5. 로그아웃
-                    case 6 -> secession();              //6. 회원탈퇴
+                    case 5 -> logout();
+                    case 6 -> secession();
                     case 7 -> {
                         logout();
-                        programExit();                     //7. 종료(선 로그아웃)
+                        programExit();
                     }
                     default -> System.out.println("올바른 번호를 선택하세요.");
                 }
             }
         }
     }
-      // [유저 메뉴 ]
-      private static void showUserMenu(){
+
+    private static void showUserMenu() {
         System.out.println("1. 나의 정보 확인");
         System.out.println("2. 게시글 등록");
         System.out.println("3. 게시판 보기");
-        System.out.println("4. 회원 목록(관리자전용 메뉴)");
+        System.out.println("4. 회원 목록(관리자 전용)");
         System.out.println("5. 로그아웃");
         System.out.println("6. 회원탈퇴");
         System.out.println("7. 종료");
-        System.out.print("선택: ");
     }
-    // [메인메뉴 출력]
+
     private static void showMainMenu() {
-            System.out.println("1. 회원 가입");
-            System.out.println("2. 로그인");
-            System.out.println("3. 아이디 찾기");
-            System.out.println("4. 비밀번호 초기화");
-            System.out.println("5. 종료");
-            System.out.print("선택>>: ");
+        System.out.println("1. 회원 가입");
+        System.out.println("2. 로그인");
+        System.out.println("3. 아이디 찾기");
+        System.out.println("4. 비밀번호 초기화");
+        System.out.println("5. 종료");
     }
-    // [게시판 메뉴 출력]
-    private static void boardMenu(){
-        System.out.println("1. 게시글 상세보기");
-        System.out.println("2. 게시글 수정");
-        System.out.println("3. 게시글 삭제");
-        System.out.println("4. 돌아가기");
-        System.out.print("선택: ");
+
+    private static void registerMember() {
+        String id = getInput("아이디:");
+        String password = getInput("비밀번호:");
+        String memberName = getInput("이름:");
+        String tel = getInput("전화번호:");
+        String address = getInput("주소:");
+        String sex = getInput("성별 (M/F):");
+
+        UnifiedDTO member = new UnifiedDTO();
+        member.setId(id);
+        member.setPassword(password);
+        member.setMemberName(memberName);
+        member.setTel(tel);
+        member.setAddress(address);
+        member.setSex(sex);
+
+        controller.registerMember(member);
     }
-    // [내정보보기]
+
+    private static void loginMember() {
+        System.out.println("<<<로그인>>>");
+        String id = getInput("아이디:");
+        String password = getInput("비밀번호:");
+        UnifiedDTO member = controller.login(id, password);
+        if (member != null) {
+            isAdmin = "Y".equals(member.getIsAdmin());
+            loggedInUserId = member.getId();
+        } 
+    }
+
+    private static void findMemberId() {
+        String memberName = getInput("이름:");
+        String password = getInput("비밀번호:");
+        String tel = getInput("전화번호:");
+        controller.findMemberId(memberName, password, tel);
+    }
+
+    private static void resetPassword() {
+        String id = getInput("아이디:");
+        String oldPassword = getInput("현재 비밀번호:");
+        String tel = getInput("등록된 전화번호:");
+
+        if (controller.verifyUser(id, oldPassword, tel)) {
+            String newPassword = getInput("새 비밀번호:");
+            controller.resetPassword(id, newPassword);
+            System.out.println("비밀번호가 초기화되었습니다. :"+newPassword);
+        } else {
+            System.out.println("본인 인증에 실패했습니다. 정보를 다시 확인해주세요.");
+        }
+    }
+
+    private static void secession() {
+        String pass = getInput("비밀번호:");
+        String certpass = getInput("비밀번호 확인:");
+        controller.deleteMember(loggedInUserId, pass, certpass);
+        logout();
+    }
+
+    private static void logout() {
+        controller.logout(loggedInUserId);
+        loggedInUserId = null;
+        isAdmin = false;
+    }
+
     private static void showMyInfo() {
         UnifiedDTO myInfo = controller.getMyInfo(loggedInUserId);
         if (myInfo != null) {
@@ -95,149 +149,56 @@ public class Main {
             System.out.println("전화번호: " + myInfo.getTel());
             System.out.println("주소: " + myInfo.getAddress());
             System.out.println("성별: " + myInfo.getSex());
-        } else {
-            System.out.println("정보를 불러오는데 실패했습니다.");
         }
     }
-    // [회원 가입]
-    private static void registerMember() {  
-        while (true) {
-            // 회원 정보 입력
-            String id = getInput("아이디:");
-            String password = getInput("비밀번호:");
-            String memberName = getInput("이름:");
-            String tel = getInput("전화번호:");
-            String address = getInput("주소:");
-            String sex = getInput("성별 (M/F):");
-            
-            // DTO에 회원 정보 설정
-            UnifiedDTO member = new UnifiedDTO();
-            member.setId(id);
-            member.setPassword(password);
-            member.setMemberName(memberName);
-            member.setTel(tel);
-            member.setAddress(address);
-            member.setSex(sex);
-    
-            // 회원 가입 메뉴 출력 및 선택
-            System.out.println("1. 가입");
-            System.out.println("2. 다시 입력");
-            System.out.println("3. 이전 화면으로");
-            System.out.print("선택: ");
-            int registerChoice = scanner.nextInt();
-            scanner.nextLine(); // 입력버퍼 클리어
-    
-            switch (registerChoice) {
-                case 1 -> {
-                    controller.registerMember(member); // 가입 확정
-                    return; // 함수 종료 (메인 메뉴로 돌아감)
-                }
-                case 2 -> System.out.println("다시 입력하세요."); // 다시 입력
-                case 3 -> {
-                    System.out.println("이전 화면으로 돌아갑니다.");
-                    return; // 함수 종료 (메인 메뉴로 돌아감)
-                }
-                default -> System.out.println("올바른 번호를 선택하세요.");
-            }
-        }
-    }
-    
-    // [회원탈퇴]
-    private static void secession() {
-        System.out.println("회원탈퇴를 진행합니다. ");
-        String memberId = getInput("아이디 : ");
-        String pass = getInput("비밀번호 : ");
-        String certpass = getInput("비밀번호 확인 : ");
-        controller.deleteMember(memberId, pass, certpass);
-      // 회원탈퇴 처리로직으로 이동
-   }
-    // [로그인]
-    private static void loginMember() {
-        System.out.println("<<<로그인>>>");
-        String id = getInput("아이디:");
-        String password = getInput("비밀번호:");
-        try {
-            UnifiedDTO member = controller.login(id, password);
-            if (member != null) {
-                isAdmin = "Y".equals(member.getIsAdmin()); // 관리자인지 확인
-                loggedInUserId = member.getId();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    // 로그아웃
-    private static void logout() {
-        controller.logout(loggedInUserId);
-        loggedInUserId = null; // 로그아웃 후 로그인 상태 초기화
-        isAdmin = false; // 관리자 상태 초기화
-        System.out.println("로그아웃되었습니다.");
-    }
-    //아이디찾기
-    private static String findMemberId() {
-        String memberName = getInput("이름:");
-        String password = getInput("비밀번호:");
-        String tel = getInput("전화번호:");
-        try {
-            String memberId = controller.findMemberId(memberName, password, tel);
-            if (memberId != null) {
-                System.out.println("아이디 찾기 성공: " + memberId);
-                return memberId;
-            } else {
-                System.out.println("아이디 찾기 실패: 이름 또는 전화번호를 확인하세요.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    
-    // 비밀번호 초기화
-    private static void resetPassword() {
-        String id = getInput("아이디:");
-    
-        // 본인 검증을 위한 정보 입력
-        String oldPassword = getInput("현재 비밀번호:");  // 기존 비밀번호를 입력받아 검증
-        String tel = getInput("등록된 전화번호:");
-    
-        // 본인 검증
-        if (controller.verifyUser(id, oldPassword, tel)) {
-            // 검증이 성공한 경우에만 비밀번호를 초기화할 수 있음
-            String newPassword = getInput("새 비밀번호:");
-            controller.resetPassword(id, newPassword);
-        } else {
-            // 검증이 실패한 경우
-            System.out.println("본인 인증에 실패했습니다. 정보를 다시 확인해주세요.");
-        }
-    }
-    // 프로그램 종료 : 스캐너 close 후 DB커넥션 해제 후 종료
-    private static void programExit() {
-        try {  conn.close(); // DB 연결 해제 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-        if (scanner != null) {
-            scanner.close(); // 프로그램 종료 시에만 Scanner 닫기
-        }
-        System.out.println("프로그램을 종료합니다.");
-        System.exit(0); }// 시스템 종료
-    }
-    
-  // 게시물 상세보기 + Viewcnt+1
-  private static void boardView() {
-    int boardId = getInputInt("상세보기를 원하는 게시물 번호?");
 
-    UnifiedDTO board = controller.getBoardById(boardId);
-    if (board == null) {
-        System.out.println("게시글이 존재하지 않습니다."); 
-    } else {
-        controller.incrementViewCount(boardId);
-        detailView(board);
-    }
-}
+    private static void insertBoard() {
+        String title = getInput("제목을 입력하세요: ");
+        String content = getInput("내용을 입력하세요: ");
+        String writer = getInput("작성자를 입력하세요: ");
+        String boardPassword = getInput("수정/삭제시 사용할 비밀번호를 입력하세요:");
 
-     // 게시물 상세
-     private static void detailView(UnifiedDTO board) {
+        UnifiedDTO board = new UnifiedDTO();
+        board.setTitle(title);
+        board.setContent(content);
+        board.setWriter(writer);
+        board.setBoardPassword(boardPassword);
+
+        controller.insertBoard(board);
+    }
+
+    private static void deleteBoard() {
+        int boardId = getInputInt("삭제할 게시글 번호를 입력하세요: ");
+        controller.deleteBoard(boardId);
+    }
+
+    private static void updateBoard() {
+        int boardId = getInputInt("수정할 게시글 번호를 입력하세요: ");
+        UnifiedDTO board = controller.getBoardById(boardId);
+
+        if (board != null) {
+            String newTitle = getInput("새로운 제목을 입력하세요: ");
+            String newContent = getInput("새로운 내용을 입력하세요: ");
+            String newBoardPassword = getInput("새로운 게시물 비밀번호를 입력하세요 ");
+
+            board.setTitle(newTitle);
+            board.setContent(newContent);
+            board.setBoardPassword(newBoardPassword);
+
+            controller.updateBoard(board);
+        }
+    }
+
+    private static void boardView() {
+        int boardId = getInputInt("상세보기를 원하는 게시물 번호?");
+        UnifiedDTO board = controller.getBoardById(boardId);
+        if (board != null) {
+            controller.incrementViewCount(boardId);
+            detailView(board);
+        }
+    }
+
+    private static void detailView(UnifiedDTO board) {
         System.out.println("게시물 번호: " + board.getIdx());
         System.out.println("제목: " + board.getTitle());
         System.out.println("내용: " + board.getContent());
@@ -252,67 +213,86 @@ public class Main {
         }
     }
 
-    // 페이지별로 게시글 목록 출력
+    private static void showMemberAll() {
+        List<UnifiedDTO> memberList = controller.showMemberAll();
+        if (memberList != null && !memberList.isEmpty()) {
+            System.out.println("회원 목록:");
+            for (UnifiedDTO member : memberList) {
+                System.out.println("아이디: " + member.getId());
+                System.out.println("이름: " + member.getMemberName());
+                System.out.println("전화번호: " + member.getTel());
+                System.out.println("주소: " + member.getAddress());
+                System.out.println("성별: " + member.getSex());
+                System.out.println("------------------------------------");
+            }
+        }
+    }
+
+    private static void manageBoards() {
+        getAllBoards();
+        while (true) {
+            boardMenu();
+            int boardMenuChoice = getInputInt("선택: ");
+            switch (boardMenuChoice) {
+                case 1 -> boardView();
+                case 2 -> updateBoard();
+                case 3 -> deleteBoard();
+                case 4 -> {
+                    System.out.println("이전 메뉴로 돌아갑니다.");
+                    return;
+                }
+                default -> System.out.println("올바른 번호를 선택하세요.");
+            }
+        }
+    }
+
     private static void getAllBoards() {
-        List<UnifiedDTO> boardList = controller.getAllBoards(); // Controller에서 데이터 가져오기
+        List<UnifiedDTO> boardList = controller.getAllBoards();
         if (boardList == null || boardList.isEmpty()) {
-             System.out.println("게시물이 없습니다.");
+            System.out.println("게시물이 없습니다.");
             return;
         }
 
-        int pageSize = 10; // 한 페이지에 표시할 게시물 수
+        int pageSize = 10;
         int totalPages = (int) Math.ceil((double) boardList.size() / pageSize);
         int currentPage = 1;
-    
-        Scanner scanner = new Scanner(System.in);
-    
+
         while (true) {
-            // 현재 페이지의 시작 인덱스와 끝 인덱스 계산
             int startIndex = (currentPage - 1) * pageSize;
             int endIndex = Math.min(startIndex + pageSize, boardList.size());
-    
-            // 테이블 헤더 출력
-            System.out.printf("%-4s | %-3s | %-23s | %-6s | %-10s%n", "No. ", "작성자", "제목", "읽은수", "작성일");
+
+            System.out.printf("%-4s | %-3s | %-23s | %-6s | %-10s%n", "No.", "작성자", "제목", "읽은수", "작성일");
             System.out.println("----------------------------------------------------------------------------------------");
-    
-            // 게시물 목록 출력
+
             for (int i = startIndex; i < endIndex; i++) {
                 UnifiedDTO board = boardList.get(i);
-                System.out.printf("%-3d | %-7s | %-25s | %-6d | %-20s%n",
-                    board.getIdx(),
-                    board.getWriter(),
-                    truncateString(board.getTitle(), 25),
-                    board.getViewCnt(),
-                    board.getInsertDate().toString()
-                );
+                System.out.printf("%-4d | %-7s | %-25s | %-6d | %-20s%n",
+                        board.getIdx(), board.getWriter(), truncateString(board.getTitle(), 25),
+                        board.getViewCnt(), board.getInsertDate().toString());
             }
-    
-            // 페이지 네비게이션 출력
-            System.out.println("----------------------------------------------------------------------------------------");
+
             System.out.printf("현재 페이지: %d/%d (페이지이동: [페이지숫자], 이전 페이지: p, 다음 페이지: n, 이전메뉴로: q): ", currentPage, totalPages);
-            String input = scanner.nextLine();
-    
+            String input = getInput("");
+
             switch (input.toLowerCase()) {
-                case "n": // 다음 페이지
+                case "n" -> {
                     if (currentPage < totalPages) {
                         currentPage++;
                     } else {
                         System.out.println("마지막 페이지입니다.");
                     }
-                    break;
-                
-                case "p": // 이전 페이지
+                }
+                case "p" -> {
                     if (currentPage > 1) {
                         currentPage--;
                     } else {
                         System.out.println("첫 페이지입니다.");
                     }
-                    break;
-            
-                case "q": // 이전메뉴로
+                }
+                case "q" -> {
                     return;
-            
-                default: // 특정 페이지 이동 시도
+                }
+                default -> {
                     try {
                         int page = Integer.parseInt(input);
                         if (page >= 1 && page <= totalPages) {
@@ -323,124 +303,27 @@ public class Main {
                     } catch (NumberFormatException e) {
                         System.out.println("잘못된 입력입니다. 숫자 또는 'p', 'n', 'q' 중 하나를 입력하세요.");
                     }
-                    break;
-            }
-        }
-    }
-    
-    // 문자열을 특정 길이로 자르는 메서드 (필요에 따라 잘린 문자열에 "..." 추가 가능)
-    private static String truncateString(String str, int length) {
-        if (str.length() > length) {
-            return str.substring(0, length) + "...";
-        } else {
-            return str;
-        }
-    }
-    //게시글 등록
-    private static void insertBoard() {
-        String title = getInput("제목을 입력하세요: ");
-        String content = getInput("내용을 입력하세요: ");
-        String writer = getInput("작성자를 입력하세요: ");
-        String boardPassword = getInput("수정/삭제시 사용할 비밀번호를 입력하세요: ");
-        
-        UnifiedDTO board = new UnifiedDTO();
-        board.setTitle(title);
-        board.setContent(content);
-        board.setWriter(writer);
-        board.setPassword(boardPassword);
-        // board.setInsertDate(new Timestamp(insertDate)); // 현재 날짜와 시간으로 설정
-        controller.insertBoard(board);
-    }
-    
-    // 게시글 삭제
-    private static void deleteBoard() {
-        int boardId = getInputInt("삭제할 게시글 번호를 입력하세요: ");
-        UnifiedDTO board = controller.getBoardById(boardId);
-    
-        if (board == null) {
-            System.out.println("게시글이 존재하지 않습니다.");
-            return; // 이전 화면으로 돌아가기
-        }
-    
-        boolean result = controller.deleteBoard(boardId);
-        if (result) {
-            System.out.println("게시글이 성공적으로 삭제되었습니다.");
-        } else {
-            System.out.println("게시글 삭제에 실패했습니다.");
-        }
-    }
-
-   // 게시글 수정
-private static void updateBoard() {
-    int boardId = getInputInt("수정할 게시글 번호를 입력하세요: ");
-    // 수정할 게시글을 먼저 가져온다.
-    UnifiedDTO board = controller.getBoardById(boardId);
-    
-    if (board == null) { //게시글이 없으면
-        System.out.println("게시글이 존재하지 않습니다.");
-        return; // 이전 화면으로 돌아가기
-    }
-    String newTitle = getInput("새로운 제목을 입력하세요: ");
-    String newContent = getInput("새로운 내용을 입력하세요: ");
-    String newBoard = getInput("새로운 게시물 비밀번호를 입력하세요 ");
-    // 새로운 내용으로 게시글을 업데이트한다.
-    board.setTitle(newTitle);
-    board.setContent(newContent);
-    board.setBoardPassword(newBoard );
-    // 수정된 내용을 저장합니다.
-    boolean result = controller.updateBoard(board);
-    if (result) {
-        System.out.println("게시글이 성공적으로 수정되었습니다.");
-    } else {
-        System.out.println("게시글 수정에 실패했습니다.");
-    }
-}
-    /* 관리자 기능 : 모든 회원 조회 */
-    private static void showMemberAll() {
-        List<UnifiedDTO> memberList = controller.showMemberAll(); // Controller 클래스의 showMemberList 호출
-    
-        if (memberList == null || memberList.isEmpty()) {
-            System.out.println("회원 목록이 없습니다.");
-            return;
-        }
-
-    System.out.println("회원 목록:");
-    System.out.println("------------------------------------");
-    for (UnifiedDTO member : memberList) {
-        System.out.println("아이디: " + member.getId());
-        System.out.println("이름: " + member.getMemberName());
-        System.out.println("전화번호: " + member.getTel());
-        System.out.println("주소: " + member.getAddress());
-        System.out.println("성별: " + member.getSex());
-        System.out.println("------------------------------------");
-    }
-}
-private static void Boards() {
-    getAllBoards(); // 게시글 목록 조회
-
-    while (true) {
-        boardMenu(); // 게시글 관리 메뉴 출력
-        int boardMenuChoice = scanner.nextInt();
-        scanner.nextLine(); // 입력버퍼 클리어
-
-        switch (boardMenuChoice) {
-            case 1 -> boardView(); // 1. 게시글 상세보기
-            case 2 -> updateBoard(); // 2. 게시글 수정
-            case 3 -> deleteBoard(); // 3. 게시글 삭제
-            case 4 -> {
-                System.out.println("이전 메뉴로 돌아갑니다.");
-                return; // '돌아가기' 선택 시 함수 종료
                 }
-            default -> System.out.println("올바른 번호를 선택하세요.");
             }
         }
     }
-    //공통 입력처리 함수 : 받은 문자열 출력후 스캐너입력을 대기한다.
+
+    private static String truncateString(String str, int length) {
+        return str.length() > length ? str.substring(0, length) + "..." : str;
+    }
+
+    private static void boardMenu() {
+        System.out.println("1. 게시글 상세보기");
+        System.out.println("2. 게시글 수정");
+        System.out.println("3. 게시글 삭제");
+        System.out.println("4. 돌아가기");
+    }
+
     private static String getInput(String prompt) {
         System.out.print(prompt);
         return scanner.nextLine();
     }
-    // 공통 입력처리 함수 : 받은 문자열 출력 후 받은 문자열을 정수형으로 변환하여 반환.
+
     private static int getInputInt(String prompt) {
         while (true) {
             try {
@@ -451,9 +334,23 @@ private static void Boards() {
             }
         }
     }
-    private static void checkAdminStatus(){
+
+    private static void checkAdminStatus() {
         isAdmin = true;
         System.out.println("관리자 모드로 전환되었습니다.");
-        return ;
+    }
+
+    private static void programExit() {
+        try {
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (scanner != null) {
+                scanner.close();
+            }
+            System.out.println("프로그램을 종료합니다.");
+            System.exit(0);
+        }
     }
 }
