@@ -83,14 +83,7 @@ public class Service {
         return unifiedDAO.setDeleteYn(memberId, deleteYn);
     }
 
-    // 로그인 및 로그아웃 기록 처리
-    public void recordLoginAndLogout(String memberId, boolean isLogin) {
-        if (isLogin) {
-            unifiedDAO.recordLogin(memberId);
-        } else {
-            unifiedDAO.recordLogout(memberId);
-        }
-    }
+
 
     // 관리자 여부 확인
     public boolean checkAdminStatus(String memberId) {

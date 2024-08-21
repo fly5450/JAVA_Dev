@@ -149,7 +149,8 @@ public class Main {
         String pass = getInput("비밀번호 : ");
         String certpass = getInput("비밀번호 확인 : ");
         controller.deleteMember(memberId, pass, certpass);
-    }
+      // 회원탈퇴 처리로직으로 이동
+   }
     // [로그인]
     private static void loginMember() {
         System.out.println("<<<로그인>>>");
@@ -194,16 +195,28 @@ public class Main {
     // 비밀번호 초기화
     private static void resetPassword() {
         String id = getInput("아이디:");
-        String newPassword = getInput("새 비밀번호:");
-        controller.resetPassword(id, newPassword);
+    
+        // 본인 검증을 위한 정보 입력
+        String oldPassword = getInput("현재 비밀번호:");  // 기존 비밀번호를 입력받아 검증
+        String tel = getInput("등록된 전화번호:");
+    
+        // 본인 검증
+        if (controller.verifyUser(id, oldPassword, tel)) {
+            // 검증이 성공한 경우에만 비밀번호를 초기화할 수 있음
+            String newPassword = getInput("새 비밀번호:");
+            controller.resetPassword(id, newPassword);
+        } else {
+            // 검증이 실패한 경우
+            System.out.println("본인 인증에 실패했습니다. 정보를 다시 확인해주세요.");
+        }
     }
     // 프로그램 종료 : 스캐너 close 후 DB커넥션 해제 후 종료
     private static void programExit() {
         System.out.println("프로그램을 종료합니다");
-        try { scanner.close(); conn.close(); // DB 연결 해제
+        try {  conn.close(); // DB 연결 해제
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        }finally {scanner.close();}
     }
     
   // 게시물 상세보기

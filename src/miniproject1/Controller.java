@@ -49,29 +49,33 @@ public class Controller {
     }
     
     // [회원 탈퇴]
-    public void deleteMember(String memberId, String password, String certPassword) {
-    try {
-        if (!password.equals(certPassword)) {
-            System.out.println("비밀번호가 일치하지 않습니다. 다시 시도하세요.");
-            return;
-        }
-
-        String savedPassword = service.getPasswordById(memberId);
-        if (savedPassword != null && savedPassword.equals(password)) {
-            boolean success = service.setDeleteYn(memberId, true);
-            if (success) {
-                System.out.println("성공적으로 회원탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
+    public boolean deleteMember(String memberId, String password, String certPassword) {
+        try { //비밀번호 불일치
+            // if (!password.equals(certPassword)) {
+            //     System.out.println("비밀번호가 일치하지 않습니다. 다시 시도하세요.");
+            //     return false;
+            // }
+                //비밀번호 검증하여 맞으면 로그아웃처리, 틀리면 재시도
+            String savedPassword = service.getPasswordById(memberId);
+            if (savedPassword != null && savedPassword.equals(password)) {
+                boolean success = service.setDeleteYn(memberId, true); //삭제여부필드 True(Y)로 변경
+                if (success) {
+                    service.logout(memberId); // 회원 탈퇴 시 로그아웃 기록
+                    System.out.println("성공적으로 회원탈퇴가 완료되었습니다.");
+                    return true;
+                } else {
+                    System.out.println("회원 탈퇴에 실패했습니다. 다시 시도하세요.");
+                }
             } else {
-                System.out.println("회원 탈퇴에 실패했습니다. 다시 시도하세요.");
+                System.out.println("비밀번호가 일치하지 않습니다.");
             }
-        } else {
-            System.out.println("비밀번호가 일치하지 않습니다.");
+        } catch (Exception e) {
+            System.out.println("회원 탈퇴 중 오류가 발생했습니다. 잠시 후 다시 시도하세요.");
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        System.out.println("회원 탈퇴 중 오류가 발생했습니다. 잠시 후 다시 시도하세요.");
-        e.printStackTrace();
+        return false;
+       
     }
-}
     // [비밀번호초기화]
     public void resetPassword(String id, String newPassword) {
         int result = service.resetPassword(id, newPassword);
@@ -80,6 +84,16 @@ public class Controller {
         } else {
             System.out.println("비밀번호 초기화에 실패했습니다.");
         }
+    }
+    public boolean verifyUser(String id, String password, String tel) {
+        UnifiedDTO user = service.getMemberById(id);
+    
+        if (user != null) {
+            // 입력된 비밀번호와 전화번호가 데이터베이스에 저장된 정보와 일치하는지 확인
+            return user.getPassword().equals(password) && user.getTel().equals(tel);
+        }
+        
+        return false;  // 일치하지 않으면 false 반환
     }
     // [내정보보기]
     public UnifiedDTO getMyInfo(String userId) {
