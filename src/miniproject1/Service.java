@@ -28,14 +28,14 @@ public class Service {
     if (member != null) {
         recordLogin(member.getId());
         System.out.println("로그인 성공: " + member.getId() + " << " + member.getMemberName() + " >>님 환영합니다.");
-    //     } else {
-    //         System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
-    //     }
-    //     return member;
-    // } // 로그인 기록 남기기
-    }
-    return member;
-}
+        } else {
+            System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
+        }
+        return member; 
+  }
+
+
+
 
     // // 로그아웃
     // public void logoutMember(String memberId) {
@@ -44,8 +44,11 @@ public class Service {
     // }
     // 로그아웃 시, 프로시저 호출하여 로그아웃 시간 기록
     public void logoutMember(String memberId) {
-        recordLogout(memberId); // 로그아웃 기록 남기기
+        recordLogout(memberId); // 로그아웃 기록 남기기    
+        System.out.println("로그아웃 성공!");
     }
+
+    
 
     // 로그인 기록을 위한 프로시저 호출
     private void recordLogin(String logid) {
