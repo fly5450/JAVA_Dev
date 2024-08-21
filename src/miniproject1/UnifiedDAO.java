@@ -7,18 +7,21 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 // DAO는 데이터베이스와의 상호작용을 담당하는 객체입니다. 주로 데이터베이스의 CRUD (Create, Read, Update, Delete) 작업을 수행합니다.
 public class UnifiedDAO {
     private Connection conn;
-
+    private static final Logger logger = Logger.getLogger(Service.class.getName());
     public UnifiedDAO(Connection conn) {
         this.conn = conn;
     }
 
     // 회원 가입
     public int registerMember(UnifiedDTO member) {
-        String sql = "INSERT INTO MemberInfo (ID, PASSWORD, MEMBERNAME, TEL, ADDRESS, SEX) " 
-                   + "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO MemberInfo (ID, PASSWORD, MEMBERNAME, TEL, ADDRESS, SEX, ISADMINYN) " 
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, member.getId());
             pstmt.setString(2, member.getPassword());
@@ -26,9 +29,10 @@ public class UnifiedDAO {
             pstmt.setString(4, member.getTel());
             pstmt.setString(5, member.getAddress());
             pstmt.setString(6, member.getSex());
+            pstmt.setString(7, member.getIsAdminYn()); // 관리자 여부 설정
             return pstmt.executeUpdate();
         } catch (SQLException e) {
-            if (e.getErrorCode() == 1) { // ORA-00001: unique constraint violated
+            if (e.getErrorCode() == 1) { 
                 System.out.println("!!가입불가!! 관리자에게 문의하세요");
             } else {
                 e.printStackTrace();
@@ -54,7 +58,7 @@ public class UnifiedDAO {
                 member.setTel(rs.getString("TEL"));
                 member.setAddress(rs.getString("ADDRESS"));
                 member.setSex(rs.getString("SEX"));
-                
+                member.setIsAdminYn(rs.getString("ISADMINYN")); // isAdminYn 필드 설정
                 return member;
             } else {
                 return null;
@@ -107,9 +111,12 @@ public class UnifiedDAO {
 
     // 아이디 찾기 - PL/SQL 프로시저 호출
     public String findMemberId(String memberName, String password, String tel) {
+        if (memberName == null || password == null || tel == null) {
+            throw new IllegalArgumentException("필수 입력 값이 누락되었습니다.");
+        }
         String memberId = null;
         String sql = "{call FIND_MEMBER_ID(?, ?, ?, ?)}";
-
+        //사용자 입력 예외처리
         try (CallableStatement cstmt = conn.prepareCall(sql)) {
             cstmt.setString(1, memberName);
             cstmt.setString(2, password);
@@ -117,9 +124,8 @@ public class UnifiedDAO {
             cstmt.registerOutParameter(4, Types.VARCHAR);
             cstmt.execute();
             memberId = cstmt.getString(4);
-        } catch (Exception e) {
-            System.err.println("Service.findMemberId 오류: " + e.getMessage());
-            e.printStackTrace();
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "아이디 찾기 프로시저 호출 중 예외 발생", e);
         }
         return memberId;
     }
@@ -132,7 +138,7 @@ public class UnifiedDAO {
             pstmt.setString(2, id);
             return pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+             logger.log(Level.SEVERE, "비밀번호 초기화중 예외 발생", e);
             return 0;
         }
     }
@@ -147,7 +153,7 @@ public class UnifiedDAO {
                 return rs.getString("password");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "비밀번호 확인중 예외 발생", e);
         }
         return null;
     }
@@ -168,7 +174,7 @@ public class UnifiedDAO {
                 return member;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "회원정보 조회 중 예외발생", e);
         }
         return null;
     }
@@ -182,12 +188,12 @@ public class UnifiedDAO {
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "테이블 필드변경 중 예외발생", e);
             return false;
         }
     }
 
-    // 게시물 등록
+    // 게시글 등록
     public int insertBoard(UnifiedDTO board) {
         String sql = "INSERT INTO board (title, content, writer, insert_date, BOARDPASSWORD) "
                    + "VALUES (?, ?, ?, ?, ?)";
@@ -199,12 +205,12 @@ public class UnifiedDAO {
             pstmt.setString(5, board.getBoardPassword());
             return pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "게시글 등록중 예외발생", e);
             return 0;
         }
     }
 
-    // 게시물 수정
+    // 게시글 수정
     public int updateBoard(UnifiedDTO board) {
         String sql = "UPDATE board SET title = ?, content = ?, writer = ?, "
                    + "update_date = ? WHERE idx = ?";
@@ -216,19 +222,19 @@ public class UnifiedDAO {
             pstmt.setInt(5, board.getIdx());
             return pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "게시글 수정중 예외발생", e);
             return 0;
         }
     }
 
-    // 게시물 삭제
+    // 게시글 삭제
     public int deleteBoard(int idx) {
         String sql = "DELETE FROM board WHERE idx = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idx);
             return pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "게시글 삭제 중 예외발생", e);
             return 0;
         }
     }
@@ -254,7 +260,7 @@ public class UnifiedDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "게시글 상세조회 중 예외 발생", e);
         }
         return null;
     }
@@ -278,7 +284,7 @@ public class UnifiedDAO {
                 boardList.add(board);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "게시글 목록조회 중 예외 발생", e);
         }
         return boardList;
     }
@@ -290,13 +296,13 @@ public class UnifiedDAO {
             pstmt.setInt(1, no);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "[Viewcnt] 예외 발생", e);
         }
     }
 
     // 관리자 여부 확인
     public boolean checkAdminStatus(String id) {
-        String sql = "SELECT isadminYn FROM MemberInfo WHERE ID = ?";
+        String sql = "SELECT isadminYN FROM MemberInfo WHERE ID = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -304,7 +310,7 @@ public class UnifiedDAO {
                 return "Y".equalsIgnoreCase(rs.getString("isadminYn"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "관리자 Status 확인중 예외발생", e);
         }
         return false;
     }
@@ -327,9 +333,8 @@ public class UnifiedDAO {
                 memberList.add(member);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "회원목록 조회중 예외발생", e);
         }
-        
         return memberList;
     }
 }

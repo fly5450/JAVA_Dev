@@ -25,12 +25,13 @@ public class UnifiedDTO {
     private String sex;         //6
     private Date last_login_date;      //7
     private Date last_logout_date;     //8
-    private String deleteYn;                //9
-    private String isAdmin;                 //10
+    private String deleteYn;           //9
+
+    private String isAdminYn;            //10
     // MEMLOG 테이블 관련 필드
-    private String logid;                    //1
-    private Timestamp login_Date;           //2
-    private Timestamp logout_Date;          //3
+    private String logid;                //1
+    private Timestamp login_Date;        //2
+    private Timestamp logout_Date;        //3
 
 
     public int getIdx() {
@@ -177,14 +178,15 @@ public class UnifiedDTO {
         this.deleteYn = deleteYn;
     }
 
-    public String getIsAdmin() {
-        return this.isAdmin;
+    public String getIsAdminYn() {
+        return this.isAdminYn;
     }
 
-    public void setIsAdmin(String isAdmin) {
-        this.isAdmin = isAdmin;
+    public void setIsAdminYn(String isAdminYn) {
+        this.isAdminYn = isAdminYn;
     }
 
+    
     public Timestamp getLogin_Date() {
         return this.login_Date;
     }
@@ -202,4 +204,11 @@ public class UnifiedDTO {
     }
 
 
+    public String getLogid() {
+        return this.logid;
+    }
+
+    public void setLogid(String logid) {
+        this.logid = logid;
+    }
 }
