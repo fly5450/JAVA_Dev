@@ -113,8 +113,15 @@ public class Service {
     public boolean verifyUser(String id, String password, String tel) {
         UnifiedDTO user = unifiedDAO.getMemberById(id);
         if (user != null) {
-            return user.getPassword().equals(password) && user.getTel().equals(tel);
+            // Password와 Tel이 null인지 확인한 후 비교
+            if (user.getPassword() != null && user.getTel() != null) {
+                return user.getPassword().equals(password) && user.getTel().equals(tel);
+            } else {
+                System.out.println("비밀번호 또는 전화번호가 null입니다.");
+                return false;
+            }
         }
+        System.out.println("사용자를 찾을 수 없습니다.");
         return false;
     }
 

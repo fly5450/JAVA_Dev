@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-
+// DAO는 데이터베이스와의 상호작용을 담당하는 객체입니다. 주로 데이터베이스의 CRUD (Create, Read, Update, Delete) 작업을 수행합니다.
 public class UnifiedDAO {
     private Connection conn;
 

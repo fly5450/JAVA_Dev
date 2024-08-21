@@ -1,18 +1,18 @@
-DECLARE
-  P_ID VARCHAR2(200);
-  P_PASSWORD VARCHAR2(200);
-  v_Return VARCHAR2(200);
+CREATE OR REPLACE FUNCTION USER01.FN_login_member (
+    p_id IN VARCHAR2,
+    p_password IN VARCHAR2
+) RETURN VARCHAR2 IS
+    v_member_name VARCHAR2(100);
 BEGIN
-  P_ID := NULL;
-  P_PASSWORD := NULL;
+    SELECT MEMBERNAME
+    INTO v_member_name
+    FROM MemberInfo
+    WHERE ID = p_id
+    AND PASSWORD = p_password;
 
-  v_Return := FN_LOGIN_MEMBER(
-    P_ID => P_ID,
-    P_PASSWORD => P_PASSWORD
-  );
-  /* Legacy output: 
-DBMS_OUTPUT.PUT_LINE('v_Return = ' || v_Return);
-*/ 
-  :v_Return := v_Return;
---rollback; 
-END;
+    RETURN v_member_name;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+END FN_login_member;

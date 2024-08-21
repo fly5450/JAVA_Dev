@@ -23,8 +23,8 @@ public class UnifiedDTO {
     private String tel;         //4
     private String address;     //5
     private String sex;         //6
-    private Timestamp last_login_date;      //7
-    private Timestamp last_logout_date;     //8
+    private Date last_login_date;      //7
+    private Date last_logout_date;     //8
     private String deleteYn;                //9
     private String isAdmin;                 //10
     // MEMLOG 테이블 관련 필드
@@ -153,19 +153,19 @@ public class UnifiedDTO {
         this.sex = sex;
     }
 
-    public Timestamp getLast_login_date() {
+    public Date getLast_login_date() {
         return this.last_login_date;
     }
 
-    public void setLast_login_date(Timestamp last_login_date) {
+    public void setLast_login_date(Date last_login_date) {
         this.last_login_date = last_login_date;
     }
 
-    public Timestamp getLast_logout_date() {
+    public Date getLast_logout_date() {
         return this.last_logout_date;
     }
 
-    public void setLast_logout_date(Timestamp last_logout_date) {
+    public void setLast_logout_date(Date last_logout_date) {
         this.last_logout_date = last_logout_date;
     }
 

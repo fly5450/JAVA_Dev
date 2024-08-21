@@ -1,22 +1,19 @@
-DECLARE
-  P_MEMBERNAME VARCHAR2(100);
-  P_PASSWORD VARCHAR2(100);
-  P_TEL VARCHAR2(15);
-  O_MEMBERID VARCHAR2(50);
+CREATE OR REPLACE PROCEDURE USER01.FIND_MEMBER_ID (
+    p_membername IN MemberInfo.MEMBERNAME%TYPE,
+    p_password IN MemberInfo.PASSWORD%TYPE,
+    p_tel IN MemberInfo.TEL%TYPE,
+    o_memberid OUT MemberInfo.ID%TYPE
+) IS
 BEGIN
-  P_MEMBERNAME := NULL;
-  P_PASSWORD := NULL;
-  P_TEL := NULL;
+    SELECT ID
+    INTO o_memberid
+    FROM MemberInfo
+    WHERE MEMBERNAME = p_membername
+      AND PASSWORD = p_password
+      AND TEL = p_tel
+      AND deleteYn = 'N';  -- 삭제되지 않은 사용자만 검색
 
-  FIND_MEMBER_ID(
-    P_MEMBERNAME => P_MEMBERNAME,
-    P_PASSWORD => P_PASSWORD,
-    P_TEL => P_TEL,
-    O_MEMBERID => O_MEMBERID
-  );
-  /* Legacy output: 
-DBMS_OUTPUT.PUT_LINE('O_MEMBERID = ' || O_MEMBERID);
-*/ 
-  :O_MEMBERID := O_MEMBERID;
-rollback; 
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        o_memberid := NULL;  -- 해당 조건에 맞는 아이디가 없으면 NULL 반환
 END;
