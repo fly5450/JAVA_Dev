@@ -32,7 +32,7 @@ public class Controller {
     }
     // [로그아웃]
     public void logout(String memberId) {
-        service.recordLogoutToTable(memberId);
+        service.logout(memberId);
         System.out.println("로그아웃 성공! ");
     }
 
@@ -133,7 +133,7 @@ public class Controller {
         }
     
     // 데이터베이스에서 memberId에 해당하는 사용자가 관리자인지 확인하는 로직
-    public boolean checkAdminStatus(String memberId) {
+    public boolean isAdmin(String memberId) {
         return service.checkAdminStatus(memberId);
         }
 

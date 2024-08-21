@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 //  DB (Model)에 접근하여 쿼리 실행을 하는 객체.
 public class UnifiedDAO  {
-    UnifiedDTO DTO = new UnifiedDTO();
+    UnifiedDTO DTOboard = new UnifiedDTO();
     public Connection conn;
 
     public UnifiedDAO(Connection conn) {
@@ -56,8 +56,8 @@ public int registerMember(UnifiedDTO member) {
         return 0;
     }
 }
- // [로그인]
- public UnifiedDTO  login(String id, String password) {
+ // [로그인 검증]
+ public UnifiedDTO login(String id, String password) {
     String sql = "SELECT * FROM MemberInfo WHERE ID = ? AND PASSWORD = ?";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, id);
@@ -106,8 +106,9 @@ public void recordLogin(String memberId) {
         e.printStackTrace();
     }
 }
- // 로그아웃 시 이력 기록 및 회원 테이블 업데이트
- public void recordLogout(String memberId) {
+
+   // 로그아웃 시 로그 기록 및 회원 테이블에 로그아웃 시간 업데이트
+   public void recordLogout(String memberId) {
     String sqlLog = "UPDATE MemberLog SET logout_date = ? WHERE id = ? AND logout_date IS NULL";
     String sqlUpdateMember = "UPDATE MemberInfo SET last_logout_date = ? WHERE id = ?";
     Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -127,22 +128,7 @@ public void recordLogin(String memberId) {
 }
 
 //---------------------------------------------------------------------------------------------------------------------------//
-  // 아이디 찾기
-//   public String findMemberId(String id,String password, String tel) {
-//     String sql = "SELECT ID FROM MemberInfo WHERE MEMBER_NAME = ? AND TEL = ?";
-//     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//         pstmt.setString(1, id);
-//         pstmt.setString(2, password);
-//         pstmt.setString(3, tel);
-//         ResultSet rs = pstmt.executeQuery();
-//         if (rs.next()) {
-//             return rs.getString("ID");
-//         }
-//     } catch (SQLException e) {
-//         e.printStackTrace();
-//     }
-//     return null;
-// }
+ 
  // 아이디 찾기 - PL/SQL 프로시저 호출
  public String findMemberId(String memberName, String password, String tel) {
     String memberId = null;
@@ -179,6 +165,7 @@ public void recordLogin(String memberId) {
         return 0;
     }
 }
+    
  // 현재 비밀번호 확인 :  memberId를 기반으로 데이터베이스에서 현재 비밀번호를 가져온다.
   public String getPasswordById(String memberId) {
     String sql = "SELECT password FROM MemberInfo WHERE ID = ?";
@@ -197,14 +184,14 @@ public void recordLogin(String memberId) {
 // Board 테이블 관련 CRUD 메서드 | 등록, 조회, 수정, 삭제 |
   //[게시글 등록] 게시물 등록시 입력 항목 : 제목, 내용, 수정/삭제시 사용할 비밀번호으로 한다.
   public int insertBoard(UnifiedDTO board) {
-    String sql = "INSERT INTO board (title, content, writer, viewcnt, insert_date, password) "
-               + "VALUES (?, ?, ?, 0, ?, ?)";
+    String sql = "INSERT INTO board (title, content, writer, insert_date, BOARDPASSWORD) "
+               + "VALUES (?, ?, ?, ?, ?)";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, board.getTitle());
         pstmt.setString(2, board.getContent());
         pstmt.setString(3, board.getWriter());
-        pstmt.setDate(4, new java.sql.Date(System.currentTimeMillis())); // 현재 날짜 사용
-        pstmt.setString(5, board.getPassword());
+        pstmt.setDate(4, new java.sql.Date(System.currentTimeMillis()));
+        pstmt.setString(5, board.getBoardPassword());  // BOARDPASSWORD 값을 설정
         return pstmt.executeUpdate();
     } catch (SQLException e) {
         e.printStackTrace();
@@ -214,15 +201,15 @@ public void recordLogin(String memberId) {
    // [게시물 수정]
    public int updateBoard(UnifiedDTO board) {
     String sql = "UPDATE board SET title = ?, content = ?, writer = ?, viewcnt = ?, "
-               + "deleteyn = ?, update_date = ? WHERE idx = ?";
+               + "update_date = ? WHERE idx = ?";
     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
         pstmt.setString(1, board.getTitle());
         pstmt.setString(2, board.getContent());
         pstmt.setString(3, board.getWriter());
         pstmt.setInt(4, board.getViewCnt());
-        pstmt.setString(5, board.getDeleteYn());
-        pstmt.setDate(6, new java.sql.Date(board.getUpdateDate().getTime()));
-        pstmt.setInt(7, board.getIdx());
+        // pstmt.setString(5, board.getDeleteYn());
+        // pstmt.setDate(5, new java.sql.Date(board.getUpdateDate().getTime()));
+        pstmt.setInt(6, board.getIdx());
         return pstmt.executeUpdate();
     } catch (SQLException e) {
         e.printStackTrace();
@@ -243,7 +230,7 @@ public void recordLogin(String memberId) {
 
      // 게시물 상세보기
      public UnifiedDTO boardView(int idx) {
-        String sql = "SELECT * FROM board WHERE idx = ?";
+        String sql = "SELECT * FROM board WHERE idx = ?"; //PK idx로 조회
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idx);
             ResultSet rs = pstmt.executeQuery();
@@ -283,16 +270,18 @@ public void recordLogin(String memberId) {
             pstmt.setInt(1, no);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    UnifiedDTO board = new UnifiedDTO();
-                    board.setIdx(rs.getInt("idx"));
-                    board.setTitle(rs.getString("title"));
-                    board.setContent(rs.getString("content"));
-                    board.setWriter(rs.getString("writer"));
-                    board.setViewCnt(rs.getInt("viewcnt"));
-                    board.setInsertDate(rs.getDate("insert_date"));
-                    board.setUpdateDate(rs.getDate("update_date"));
-                    board.setDeleteYn(rs.getString("deleteyn"));
-                    return board;
+                    // UnifiedDTO board = new UnifiedDTO();
+                    DTOboard.setIdx(rs.getInt("IDX"));
+                    DTOboard.setTitle(rs.getString("TITLE"));
+                    DTOboard.setContent(rs.getString("CONTENT"));
+                    DTOboard.setWriter(rs.getString("WRITER"));
+                    DTOboard.setViewCnt(rs.getInt("VIEWCNT"));
+                    DTOboard.setInsertDate(rs.getDate("INSERT_DATE"));
+                    DTOboard.setUpdateDate(rs.getDate("UPDATE_DATE"));
+                    // board.setDeleteYn(rs.getString("DELETEYN"));
+                    return DTOboard;
+                } else {
+                    System.out.println("게시물 번호가 존재하지 않습니다: " + no); // 디버깅 출력 추가
                 }
             }
         } catch (SQLException e) {
@@ -300,7 +289,6 @@ public void recordLogin(String memberId) {
         }
         return null; // 게시물 번호가 존재하지 않을 경우
     }
-    
     public List<UnifiedDTO> getAllBoards() {
         List<UnifiedDTO> boardList = new ArrayList<>();
         String sql = "SELECT idx, title, content, writer, viewcnt, insert_date, update_date FROM board";
@@ -326,7 +314,7 @@ public void recordLogin(String memberId) {
     }
      // 내정보보기
      public UnifiedDTO getMemberById(String memberId) {
-        String sql = "SELECT id, member_name, tel, address, sex FROM MemberInfo WHERE id = ?";
+        String sql = "SELECT id, membername, tel, address, sex FROM MemberInfo WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, memberId);
             ResultSet rs = pstmt.executeQuery();
@@ -361,14 +349,14 @@ public void recordLogin(String memberId) {
     // [관리자 기능: 모든 회원 목록 조회]
     public List<UnifiedDTO> showMemberAll() {
         List<UnifiedDTO> memberList = new ArrayList<>();
-        String sql = "SELECT id, member_name, tel, address, sex FROM MemberInfo";
+        String sql = "SELECT id, membername, tel, address, sex FROM MemberInfo";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 UnifiedDTO member = new UnifiedDTO();
                 member.setId(rs.getString("id"));
-                member.setMemberName(rs.getString("member_name"));
+                member.setMemberName(rs.getString("membername"));
                 member.setTel(rs.getString("tel"));
                 member.setAddress(rs.getString("address"));
                 member.setSex(rs.getString("sex"));

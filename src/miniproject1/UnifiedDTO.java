@@ -2,28 +2,11 @@ import java.sql.Date;
 import java.sql.Timestamp;
 
 public class UnifiedDTO {
- 
 
+    // 기본 생성자
     public UnifiedDTO() {
-        this.idx = idx;
-        this.title = title;
-        this.content = content;
-        this.writer = writer;
-        this.viewCnt = viewCnt;
-        this.insertDate = insertDate;
-        this.updateDate = updateDate;
-        this.deleteDate = deleteDate;
-        this.id = id;
-        this.password = password;
-        this.memberName = memberName;
-        this.tel = tel;
-        this.address = address;
-        this.sex = sex;
-        this.deleteYn = deleteYn;
-        this.isAdmin = isAdmin;
-        this.logid = logid;
-        this.login_Date = login_Date;
-        this.logout_Date = logout_Date;
+        // 기본 생성자에서는 필드를 초기화하지 않아도 됩니다.
+        // 객체 생성 시 필드를 설정할 필요가 있는 경우 생성자나 setter 메서드를 사용하세요.
     }
 
     // Board 테이블 관련 필드
@@ -31,8 +14,41 @@ public class UnifiedDTO {
     private String title;
     private String content;
     private String writer;
+    private String boardPassword;
     private int viewCnt;
     private Date insertDate;
+
+    public String getBoardPassword() {
+        return this.boardPassword;
+    }
+
+    public void setBoardPassword(String boardPassword) {
+        this.boardPassword = boardPassword;
+    }
+
+    public String getLogid() {
+        return this.logid;
+    }
+
+    public void setLogid(String logid) {
+        this.logid = logid;
+    }
+
+    public Timestamp getLogin_Date() {
+        return this.login_Date;
+    }
+
+    public void setLogin_Date(Timestamp login_Date) {
+        this.login_Date = login_Date;
+    }
+
+    public Timestamp getLogout_Date() {
+        return this.logout_Date;
+    }
+
+    public void setLogout_Date(Timestamp logout_Date) {
+        this.logout_Date = logout_Date;
+    }
     private Date updateDate;
     private Date deleteDate;
 
@@ -43,8 +59,27 @@ public class UnifiedDTO {
     private String tel;
     private String address;
     private String sex;
+    private Timestamp last_login_date;
+    private Timestamp last_logout_date;
     private String deleteYn;
     private String isAdmin;
+    
+    public Timestamp getLast_login_date() {
+        return this.last_login_date;
+    }
+
+    public void setLast_login_date(Timestamp last_login_date) {
+        this.last_login_date = last_login_date;
+    }
+
+    public Timestamp getLast_logout_date() {
+        return this.last_logout_date;
+    }
+
+    public void setLast_logout_date(Timestamp last_logout_date) {
+        this.last_logout_date = last_logout_date;
+    }
+ ;
 
     // MEMLOG 테이블 관련 필드
     private String logid;
@@ -110,9 +145,9 @@ public class UnifiedDTO {
         this.viewCnt = viewCnt;
     }
 
-    public void setDeleteYn(String deleteYn) {
-        this.deleteYn = deleteYn;
-    }
+    // public void setDeleteYn(String deleteYn) {
+    //     this.deleteYn = deleteYn;
+    // }
 
     public void setInsertDate(Date insertDate) {
         this.insertDate = insertDate;
@@ -152,7 +187,7 @@ public class UnifiedDTO {
     }
 
     public String getIsAdmin() {
-        return this.isAdmin;
+        return isAdmin;
     }
 
     //  MemberInfo 테이블 Setters 

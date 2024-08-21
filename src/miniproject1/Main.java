@@ -207,29 +207,17 @@ public class Main {
     }
     
   // 게시물 상세보기
-private static void boardView() {
-    List<UnifiedDTO> boardList = controller.getAllBoards(); // Controller에서 데이터 가져오기
-    if (boardList == null || boardList.isEmpty()) {
-        System.out.println("게시물이 없습니다.");
-        return;
+  private static void boardView() {
+    int boardId = getInputInt("상세보기를 원하는 게시물 번호?");
+
+    UnifiedDTO board = controller.getBoardById(boardId);
+    if (board == null) {
+        System.out.println("게시글이 존재하지 않습니다."); // 이 메시지가 반복된다면 SQL 쿼리나 입력 값에 문제가 있을 수 있습니다.
+    } else {
+        controller.incrementViewCount(boardId);
+        detailView(board);
     }
-    String strNo = getInput("상세보기를 원하는 게시물 번호?");
-    try {
-        final int no = Integer.parseInt(strNo);
-        UnifiedDTO board = controller.getBoardById(no); // 게시물 조회
-        
-        if (board != null) { //게시글이 존재할 경우
-            controller.incrementViewCount(no); // 조회수 1 증가
-            detailView(board); // 상세보기 실행
-        } else {
-            System.out.println("게시물 번호가 존재하지 않습니다.");
-        }
-    } catch (NumberFormatException e) {
-        System.out.println("올바른 번호를 입력하세요.");
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-} 
+}
 
      // 게시물 상세정보 출력
      private static void detailView(UnifiedDTO board) {
@@ -269,13 +257,13 @@ private static void boardView() {
         String title = getInput("제목을 입력하세요: ");
         String content = getInput("내용을 입력하세요: ");
         String writer = getInput("작성자를 입력하세요: ");
-        String password = getInput("수정/삭제시 사용할 비밀번호를 입력하세요: ");
+        String boardPassword = getInput("수정/삭제시 사용할 비밀번호를 입력하세요: ");
         
         UnifiedDTO board = new UnifiedDTO();
         board.setTitle(title);
         board.setContent(content);
         board.setWriter(writer);
-        board.setPassword(password);
+        board.setPassword(boardPassword);
         // board.setInsertDate(new Timestamp(insertDate)); // 현재 날짜와 시간으로 설정
         controller.insertBoard(board);
     }
