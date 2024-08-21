@@ -5,18 +5,67 @@ public class UnifiedDTO {
 
     // 기본 생성자
     public UnifiedDTO() {
-        // 기본 생성자에서는 필드를 초기화하지 않아도 됩니다.
-        // 객체 생성 시 필드를 설정할 필요가 있는 경우 생성자나 setter 메서드를 사용하세요.
+     
     }
 
     // Board 테이블 관련 필드
-    private int idx;
-    private String title;
-    private String content;
-    private String writer;
-    private String boardPassword;
-    private int viewCnt;
-    private Date insertDate;
+    private int idx;    //1
+    private String title;  //2
+    private String content; //3
+    private String writer; //4
+    private String boardPassword; //5
+    private int viewCnt; //6 
+    private Date insertDate; //7
+    private Date updateDate; //8
+    private Date deleteDate; //9
+    // MemberInfo 테이블 관련 필드
+    private String id;      //1
+    private String password; //2
+    private String memberName; //3
+    private String tel;         //4
+    private String address;     //5
+    private String sex;         //6
+    private Timestamp last_login_date;      //7
+    private Timestamp last_logout_date;     //8
+    private String deleteYn;                //9
+    private String isAdmin;                 //10
+    // MEMLOG 테이블 관련 필드
+    private String logid;               //11
+    private Timestamp login_Date;           //12
+    private Timestamp logout_Date;          //13
+
+
+    public int getIdx() {
+        return this.idx;
+    }
+
+    public void setIdx(int idx) {
+        this.idx = idx;
+    }
+
+    public String getTitle() {
+        return this.title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return this.content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getWriter() {
+        return this.writer;
+    }
+
+    public void setWriter(String writer) {
+        this.writer = writer;
+    }
 
     public String getBoardPassword() {
         return this.boardPassword;
@@ -26,44 +75,86 @@ public class UnifiedDTO {
         this.boardPassword = boardPassword;
     }
 
-    public String getLogid() {
-        return this.logid;
+    public int getViewCnt() {
+        return this.viewCnt;
     }
 
-    public void setLogid(String logid) {
-        this.logid = logid;
+    public void setViewCnt(int viewCnt) {
+        this.viewCnt = viewCnt;
     }
 
-    // public Timestamp getLogin_Date() {
-    //     return this.login_Date;
-    // }
+    public Date getInsertDate() {
+        return this.insertDate;
+    }
 
-    // public void setLogin_Date(Timestamp login_Date) {
-    //     this.login_Date = login_Date;
-    // }
+    public void setInsertDate(Date insertDate) {
+        this.insertDate = insertDate;
+    }
 
-    // public Timestamp getLogout_Date() {
-    //     return this.logout_Date;
-    // }
+    public Date getUpdateDate() {
+        return this.updateDate;
+    }
 
-    // public void setLogout_Date(Timestamp logout_Date) {
-    //     this.logout_Date = logout_Date;
-    // }
-    private Date updateDate;
-    private Date deleteDate;
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
+    }
 
-    // MemberInfo 테이블 관련 필드
-    private String id;
-    private String password;
-    private String memberName;
-    private String tel;
-    private String address;
-    private String sex;
-    private Timestamp last_login_date;
-    private Timestamp last_logout_date;
-    private String deleteYn;
-    private String isAdmin;
-    
+    public Date getDeleteDate() {
+        return this.deleteDate;
+    }
+
+    public void setDeleteDate(Date deleteDate) {
+        this.deleteDate = deleteDate;
+    }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getMemberName() {
+        return this.memberName;
+    }
+
+    public void setMemberName(String memberName) {
+        this.memberName = memberName;
+    }
+
+    public String getTel() {
+        return this.tel;
+    }
+
+    public void setTel(String tel) {
+        this.tel = tel;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getSex() {
+        return this.sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
+    }
+
     public Timestamp getLast_login_date() {
         return this.last_login_date;
     }
@@ -79,162 +170,38 @@ public class UnifiedDTO {
     public void setLast_logout_date(Timestamp last_logout_date) {
         this.last_logout_date = last_logout_date;
     }
- ;
-
-    // MEMLOG 테이블 관련 필드
-    private String logid;
-    private Timestamp login_Date;
-    private Timestamp logout_Date;
-
-    //-----------------------------------------------------------------------------//
-    // Board 테이블 : Getters 
-    public int getIdx() {
-        return idx;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public String getWriter() {
-        return writer;
-    }
-
-    public int getViewCnt() {
-        return viewCnt;
-    }
 
     public String getDeleteYn() {
-        return deleteYn;
+        return this.deleteYn;
     }
 
-    public Date getInsertDate() {
-        return insertDate;
-    }
-
-    public Date getUpdateDate() {
-        return updateDate;
-    }
-
-    public Date getDeleteDate() {
-        return deleteDate;
-    }
-
-    // Board 테이블 : Setters 
-    public void setIdx(int idx) {
-        this.idx = idx;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public void setWriter(String writer) {
-        this.writer = writer;
-    }
-
-    public void setViewCnt(int viewCnt) {
-        this.viewCnt = viewCnt;
-    }
-
-    // public void setDeleteYn(String deleteYn) {
-    //     this.deleteYn = deleteYn;
-    // }
-
-    public void setInsertDate(Date insertDate) {
-        this.insertDate = insertDate;
-    }
-
-    public void setUpdateDate(Date updateDate) {
-        this.updateDate = updateDate;
-    }
-
-    public void setDeleteDate(Date deleteDate) {
-        this.deleteDate = deleteDate;
-    }
-    //-----------------------------------------------------------------------------//
-    //  MemberInfo 테이블 Getters 
-    public String getId() {
-        return id;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getMemberName() {
-        return memberName;
-    }
-
-    public String getTel() {
-        return tel;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public String getSex() {
-        return sex;
+    public void setDeleteYn(String deleteYn) {
+        this.deleteYn = deleteYn;
     }
 
     public String getIsAdmin() {
-        return isAdmin;
-    }
-
-    //  MemberInfo 테이블 Setters 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setMemberName(String memberName) {
-        this.memberName = memberName;
-    }
-
-    public void setTel(String tel) {
-        this.tel = tel;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public void setSex(String sex) {
-        this.sex = sex;
+        return this.isAdmin;
     }
 
     public void setIsAdmin(String isAdmin) {
         this.isAdmin = isAdmin;
     }
 
-    //-----------------------------------------------------------------------------//
-    // MEMLOG 테이블 Getter , Setter
-    public Timestamp getLoginDate() {
-        return login_Date;
+    public Timestamp getLogin_Date() {
+        return this.login_Date;
     }
 
-    public Timestamp getLogoutDate() {
-        return logout_Date;
+    public void setLogin_Date(Timestamp login_Date) {
+        this.login_Date = login_Date;
     }
 
-    public void setLoginDate(Timestamp last_login_Date) {
-        this.login_Date = last_login_Date;
+    public Timestamp getLogout_Date() {
+        return this.logout_Date;
     }
 
-    public void setLogoutDate(Timestamp last_logout_Date) {
-        this.logout_Date = last_logout_Date;
+    public void setLogout_Date(Timestamp logout_Date) {
+        this.logout_Date = logout_Date;
     }
-    //-----------------------------------------------------------------------------//
+
+
 }
