@@ -1,3 +1,5 @@
+package miniproject1;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -13,6 +15,7 @@ public class Main {
     private static String loggedInUserId = null;
     private static boolean isAdmin = false;
     private static final Logger logger = Logger.getLogger(Main.class.getName());
+
     public static void main(String[] args) {
         try {
             conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe", "user01", "5450");
@@ -21,7 +24,7 @@ public class Main {
             e.printStackTrace();
             return;
         }
-       
+
         while (true) {
             if (loggedInUserId == null) {
                 showMainMenu();
@@ -63,6 +66,7 @@ public class Main {
             }
         }
     }
+
     //일반 유저메뉴
     private static void showUserMenu() {
         System.out.println("1. 나의 정보 확인");
@@ -72,6 +76,7 @@ public class Main {
         System.out.println("5. 회원탈퇴");
         System.out.println("6. 종료");
     }
+
     //관리자 메뉴 - 4. 회원 목록 보기 (관리자 전용)
     private static void showAdminMenu() {
         System.out.println("1. 나의 정보 확인");
@@ -82,6 +87,7 @@ public class Main {
         System.out.println("6. 회원탈퇴");
         System.out.println("7. 종료");
     }
+
     //메인메뉴
     private static void showMainMenu() {
         System.out.println("1. 회원 가입");
@@ -98,6 +104,7 @@ public class Main {
         String tel = getInput("전화번호:");
         controller.findMemberId(memberName, password, tel);
     }
+
     //패스워드 초기화
     private static void resetPassword() {
         String id = getInput("아이디:");
@@ -112,6 +119,7 @@ public class Main {
             System.out.println("본인 인증에 실패했습니다. 정보를 다시 확인해주세요.");
         }
     }
+
     //회원탈퇴
     private static void secession() {
         String pass = getInput("비밀번호:");
@@ -119,12 +127,14 @@ public class Main {
         controller.deleteMember(loggedInUserId, pass, certpass);
         logout();
     }
+
     //로그아웃
     private static void logout() {
         controller.logout(loggedInUserId);
         loggedInUserId = null;
         isAdmin = false;
     }
+
     //내정보보기
     private static void showMyInfo() {
         UnifiedDTO myInfo = controller.getMyInfo(loggedInUserId);
@@ -136,6 +146,7 @@ public class Main {
             System.out.println("성별: " + myInfo.getSex());
         }
     }
+
     //게시글글 등록
     private static void insertBoard() {
         String title = getInput("제목을 입력하세요: ");
@@ -151,11 +162,13 @@ public class Main {
 
         controller.insertBoard(board);
     }
+
     //게시글 삭제
     private static void deleteBoard() {
         int boardId = getInputInt("삭제할 게시글 번호를 입력하세요: ");
         controller.deleteBoard(boardId);
     }
+    
     //게시글 수정
     private static void updateBoard() {
         int boardId = getInputInt("수정할 게시글 번호를 입력하세요: ");
@@ -173,6 +186,7 @@ public class Main {
             controller.updateBoard(board);
         }
     }
+
     //게시글 상세보기
     private static void boardView() {
         int boardId = getInputInt("상세보기를 원하는 게시물 번호?");
@@ -182,6 +196,7 @@ public class Main {
             detailView(board);
         }
     }
+
     //게시글 조회 (게시판)
     private static void detailView(UnifiedDTO board) {
         System.out.println("게시물 번호: " + board.getIdx());
@@ -197,6 +212,7 @@ public class Main {
             System.out.println("삭제된 게시물입니다.");
         }
     }
+
     //모든 회원목록 조회 (관리자기능)
     private static void showMemberAll() {
         List<UnifiedDTO> memberList = controller.showMemberAll();
@@ -212,6 +228,7 @@ public class Main {
             }
         }
     }
+
     //게시판
     private static void manageBoards() {
         getAllBoards(); //게시글 목록 조회
@@ -325,6 +342,7 @@ public class Main {
     //     System.out.println("관리자 모드로 전환되었습니다.");
     // }
     //프로그램 종료
+
     private static void programExit() {
         try {
             if (conn != null) conn.close();
@@ -356,6 +374,7 @@ public class Main {
         member.setSex(sex);
         return member;
     }   
+
     //회원가입
     private static void registerMember() {
         UnifiedDTO member = getMemberInput();

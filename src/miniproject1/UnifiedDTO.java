@@ -1,3 +1,5 @@
+package miniproject1;
+
 import java.sql.Date;
 import java.sql.Timestamp;
 

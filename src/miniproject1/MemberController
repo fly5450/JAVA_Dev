@@ -1,0 +1,17 @@
+public class MemberController {
+//회원가입 메서드
+
+private String register(Member member){
+    //1. 값 검증(아이디 중복 확인)
+    //2. 아이디가 중복되지 않으면 회원가입한다.
+    //3. 성공이면 성공메시지를 리턴한다.
+    if ( member != isEmpty() || member != null ){
+        System.out.println("회원가입에 성공하셨습니다.")
+
+    }
+
+
+}
+
+
+}

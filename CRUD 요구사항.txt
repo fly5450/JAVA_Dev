@@ -1,0 +1,136 @@
+MVC패턴을 이용한 게시판 CRUD 구현. JDBC연동
+
+
+[Huddle]
+1. VIEW 생성 권한 오류 ORA-01031: insufficient privileges
+-grant create view, create session, create table, create procedure to user01;
+
+2. AUTO_INCEREMENT 자동 행번호 추가 기능.
+-MySQL 표준 구문 지원X -> 시퀸스 & 트리거 추가
+
+3. COMMENT 구절 오라클문법 & 오류(각각 구문으로 실행해야한다)
+
+08.15 프로젝트 착수. 1일차
+
+[백엔드 PART]
+1. 오라클DB 테이블 생성
+- 회원정보 MemberInfo : 회원 테이블[아이디,비밀번호,전화번호,주소,성별]--
+CREATE TABLE MemberInfo (
+    ID VARCHAR2(50) PRIMARY KEY,
+    PASSWORD VARCHAR2(100) NOT NULL,
+    MEMBER_NAME VARCHAR2(100) NOT NULL,
+    TEL VARCHAR2(15),
+    ADDRESS VARCHAR2(255),
+    SEX CHAR(1) CHECK (SEX IN ('M', 'F'))
+);
+
+COMMENT ON COLUMN board.delete_date IS '회원정보 테이블';
+COMMENT ON COLUMN MemberInfo.ID IS '아이디';
+COMMENT ON COLUMN MemberInfo.PASSWORD IS '비밀번호';
+COMMENT ON COLUMN MemberInfo.MEMBER_NAME IS '회원 이름';
+COMMENT ON COLUMN MemberInfo.TEL IS '전화번호';
+COMMENT ON COLUMN MemberInfo.ADDRESS IS '주소';
+COMMENT ON COLUMN MemberInfo.SEX IS '성별';  
+- 게시물 Board
+CREATE TABLE board (
+    idx NUMBER NOT NULL  ,
+    title VARCHAR2(100) NOT NULL ,
+    content VARCHAR2(3000) NOT NULL,
+    writer VARCHAR2(20) NOT NULL,
+    view_cnt NUMBER DEFAULT 0 NOT NULL,
+    delete_yn CHAR(1) DEFAULT 'N' NOT NULL CHECK (delete_yn IN ('Y', 'N')),
+    insert_date DATE DEFAULT SYSDATE NOT NULL,
+    update_date DATE,
+    delete_date DATE,
+    PRIMARY KEY (idx)
+) 
+--게시물 테이블 코멘트 추가--
+COMMENT ON COLUMN board.title IS '제목';
+COMMENT ON COLUMN board.content IS '내용';
+COMMENT ON COLUMN board.writer IS '작성자';
+COMMENT ON COLUMN board.view_cnt IS '조회 수';
+COMMENT ON COLUMN board.delete_yn IS '삭제 여부';
+COMMENT ON COLUMN board.insert_date IS '등록일';
+COMMENT ON COLUMN board.update_date IS '수정일';
+COMMENT ON COLUMN board.delete_date IS '삭제일';
+ 1-1. 게시물 AUTO_INCEREMENT 오라클 지원안하므로 시퀸스와 트리거 사용
+-- 시퀸스와 트리거 사용--자동 번호 할당: 이 트리거는 board 테이블에 새로운 데이터를 삽입할 때마다, idx 컬럼에 자동으로 고유한 번호를 할당
+CREATE SEQUENCE board_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+--게시물 등록 트리거 발동: 행(row)--
+CREATE OR REPLACE TRIGGER board_insert_trigger
+BEFORE INSERT ON board --게시물 등록 전에 트리거가 실행 
+FOR EACH ROW -- 행 데이터가 삽입될 때마다, 각 행(row)에 대해 트리거 실행
+BEGIN 
+    :NEW.idx := board_seq.NEXTVAL; --NEW는 행 레벨 트리거에서의 삽입 및 갱신 조작에서 새 테이블 행을 나타내는 의사 레코드. 사용법은 :NEW.컬럼명
+END;
+
+- 로그인이력 Memberlog
+
+ --회원의 로그인, 로그아웃 일시 log. 밀리초까지 출력하는 TIMESTAMP로 사용.
+CREATE TABLE Memberlog (
+    Login_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Logout_date TIMESTAMP
+);
+ 
+게시판 CRUD 처리하기 SQL
+https://velog.io/@jyyoun1022/Mybatis-%EA%B2%8C%EC%8B%9C%ED%8C%90-CRUD-%EC%B2%98%EB%A6%AC%ED%95%98%EA%B8%B0
+
+
+[프론트엔드 PART]
+2. JAVA 클래스파일 및 함수 뼈대 생성
+-BoardController
+-BoardDAO
+-BoardDTO 
+-BoardService
+
+-----------------------------------------------------08.15 종료---------------------------------------------------------------------
+-----------------------------------------------------08.16 시작---------------------------------------------------------------------
+
+1. JAVA DVC 패턴 Class 제작 (계속)
+-BoardController : Client(User)와 소통
+1-1)BoardDAO JDBC드라이버 로드 및 Oracle DB와의 연결 설정
+1-2)게시물 삽입, 조회, 수정, 삭제  *시큐어코딩 준수 : prepareStatement
+
+-BoardDTO : DTO는 프로세스 간에 데이터를 전달하는 용도의 객체. 비즈니스 로직을 포함하지 않는 데이터를 전달하기 위한 단순한 객체 역할만 한다. (단일책임)
+-BoardService
+Main 클래스 : Client와 상호작용하는 Console (DVC패턴에서 User에게 데이터를 전달하는 유저객체?)
+
+
+-----------------------------------------------------08.16 종료---------------------------------------------------------------------
+-----------------------------------------------------08.18 시작---------------------------------------------------------------------
+1. JAVA DVC 패턴 Coding
+
+1. UnifiedDTO 클래스
+역할: Board와 MemberInfo 테이블의 데이터를 캡슐화하는 DTO(Data Transfer Object) 클래스입니다.
+기능:
+Board와 MemberInfo 테이블의 필드를 모두 포함.
+해당 필드에 대한 getter와 setter 메서드를 제공합니다.
+데이터를 객체로 전달하거나 조회할 때 사용됩니다.
+2. UnifiedDAO 클래스
+역할: 데이터베이스와 직접 상호작용하여 CRUD 작업을 수행하는 DAO(Data Access Object) 클래스입니다.
+기능:
+회원 관련 CRUD 작업(회원 등록, 로그인, 아이디 찾기, 비밀번호 초기화 등) 처리.
+게시판 관련 CRUD 작업(게시글 등록, 조회, 수정, 삭제 등) 처리.
+SQL 인젝션 방지를 위해 PreparedStatement를 사용하여 쿼리 실행.
+3. Service 클래스
+역할: 비즈니스 로직을 처리하고, DAO를 통해 데이터베이스 작업을 수행하는 서비스 클래스입니다.
+기능:
+회원 및 게시판 관련 비즈니스 로직을 처리합니다.
+DAO 클래스의 메서드를 호출하여 데이터베이스 작업을 수행합니다.
+Controller와 DAO 사이에서 중간 계층 역할을 합니다.
+4. Controller 클래스
+역할: 사용자 요청을 받아 Service를 통해 처리하고, 결과를 반환하는 컨트롤러 클래스입니다.
+기능:
+사용자로부터 입력받은 데이터를 Service에 전달하여 작업을 수행합니다.
+회원 가입, 로그인, 아이디 찾기, 비밀번호 초기화 등의 기능을 제공합니다.
+처리 결과를 콘솔에 출력하여 사용자에게 피드백을 제공합니다.
+5. Main 클래스
+역할: 프로그램의 진입점으로, 사용자와 상호작용하며 프로그램의 흐름을 제어합니다.
+기능:
+사용자에게 메뉴를 보여주고, 선택된 작업을 처리합니다.
+각 작업에 대해 Controller의 메서드를 호출하여 필요한 기능을 수행합니다.
+데이터베이스 연결 및 종료를 관리합니다.

@@ -1,3 +1,5 @@
+package miniproject1;
+
 import java.sql.Connection;
 import java.util.List;
 

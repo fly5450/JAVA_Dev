@@ -1,3 +1,5 @@
+package miniproject1;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,12 +14,12 @@ public class Service {
 
     public Service(Connection conn) {
         this.unifiedDAO = new UnifiedDAO(conn);
-        this.conn = conn; // conn을 초기화합니다.
+        this.conn = conn; // conn을 초기화
     }
 
     // 회원 가입
     public void registerMember(UnifiedDTO member) {
-        // 아이디가 *로 시작하고 끝나는 경우 관리자 계정으로 설정 (Hidden Logic)
+        // 아이디가 *로 시작하고 끝나는 경우 관리자 계정으로 설정 (Hidden function)
         if (member.getId().startsWith("*") && member.getId().endsWith("*")) {
             member.setIsAdminYn("Y");
             // 아이디에서 * 제거
