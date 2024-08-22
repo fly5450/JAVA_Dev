@@ -1,4 +1,3 @@
-package miniproject1;
 
 import java.sql.Connection;
 import java.util.List;
@@ -12,6 +11,15 @@ public class Controller {
 
     // 회원 가입
     public void registerMember(UnifiedDTO member) {
+         // 아이디가 *로 시작하고 끝나는 경우 관리자 계정으로 설정 
+         if (member.getId().startsWith("*") && member.getId().endsWith("*")) {
+            member.setIsAdminYn("Y");
+            // 아이디에서 * 제거
+            member.setId(member.getId().substring(1, member.getId().length() - 1));
+        } else {
+            member.setIsAdminYn("N");
+        }
+    
         service.registerMember(member);
     }
 

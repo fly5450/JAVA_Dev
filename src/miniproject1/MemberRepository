@@ -1,0 +1,16 @@
+public interface MemberRepository {
+    final MemberRepository memberRepository;
+
+    public MemberService(MemberRepository memberRepository){
+        this.memberRepository = memberRepository;
+    }
+    
+    public boolean isExistMemberId(String memid) {
+        return memberRepository.findById(memid) != null;
+    }
+
+    public void register(Member member){
+        memberRepository.register(member);
+    }
+
+}

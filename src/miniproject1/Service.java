@@ -1,4 +1,3 @@
-package miniproject1;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -19,15 +18,7 @@ public class Service {
 
     // 회원 가입
     public void registerMember(UnifiedDTO member) {
-        // 아이디가 *로 시작하고 끝나는 경우 관리자 계정으로 설정 (Hidden function)
-        if (member.getId().startsWith("*") && member.getId().endsWith("*")) {
-            member.setIsAdminYn("Y");
-            // 아이디에서 * 제거
-            member.setId(member.getId().substring(1, member.getId().length() - 1));
-        } else {
-            member.setIsAdminYn("N");
-        }
-    
+       
         int result = unifiedDAO.registerMember(member);
         if (result > 0) {
             System.out.println("회원 가입이 성공적으로 완료되었습니다.");

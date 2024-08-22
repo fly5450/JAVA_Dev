@@ -1,0 +1,17 @@
+public class MemberView {
+    final private Scanner scanner;
+    final private MemberController MemberController;
+
+    public MemerView(Scanner scanner, MemberController MemberController)
+
+
+
+
+
+    public void register(Member member){
+        Member member = isertform();
+        String message = 
+
+    }
+
+}

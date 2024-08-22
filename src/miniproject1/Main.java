@@ -1,5 +1,3 @@
-package miniproject1;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -97,6 +95,13 @@ public class Main {
         System.out.println("5. 종료");
     }
 
+    private static void boardMenu() {
+        System.out.println("1. 게시글 상세보기");
+        System.out.println("2. 게시글 수정");
+        System.out.println("3. 게시글 삭제");
+        System.out.println("4. 돌아가기");
+    }
+
     //아이디찾기
     private static void findMemberId() {
         String memberName = getInput("이름:");
@@ -147,7 +152,7 @@ public class Main {
         }
     }
 
-    //게시글글 등록
+    //게시글 등록
     private static void insertBoard() {
         String title = getInput("제목을 입력하세요: ");
         String content = getInput("내용을 입력하세요: ");
@@ -262,8 +267,8 @@ public class Main {
         while (true) {
             int startIndex = (currentPage - 1) * pageSize;
             int endIndex = Math.min(startIndex + pageSize, boardList.size());
-
-            System.out.printf("%-4s | %-3s | %-23s | %-6s | %-10s%n", "No.", "작성자", "제목", "읽은수", "작성일");
+            //게시판 헤더
+            System.out.printf("%-4s | %-3s | %-23s | %-6s | %-10s%n", "No.", "작성자", "제목", "조회수", "작성일");
             System.out.println("----------------------------------------------------------------------------------------");
 
             for (int i = startIndex; i < endIndex; i++) {
@@ -272,10 +277,10 @@ public class Main {
                         board.getIdx(), board.getWriter(), truncateString(board.getTitle(), 25),
                         board.getViewCnt(), board.getInsertDate().toString());
             }
-
+            //페이지 네비게이션
             System.out.printf("현재 페이지: %d/%d (페이지이동: [페이지숫자], 이전 페이지: p, 다음 페이지: n, 이전메뉴로: q): ", currentPage, totalPages);
             String input = getInput("");
-
+            //키 입력으로 페이지 이동
             switch (input.toLowerCase()) {
                 case "n" -> {
                     if (currentPage < totalPages) {
@@ -309,16 +314,9 @@ public class Main {
             }
         }
     }
-
+    //문자열 초과시 "..."으로 요약표기
     private static String truncateString(String str, int length) {
         return str.length() > length ? str.substring(0, length) + "..." : str;
-    }
-
-    private static void boardMenu() {
-        System.out.println("1. 게시글 상세보기");
-        System.out.println("2. 게시글 수정");
-        System.out.println("3. 게시글 삭제");
-        System.out.println("4. 돌아가기");
     }
 
     private static String getInput(String prompt) {
