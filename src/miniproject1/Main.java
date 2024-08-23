@@ -1,4 +1,4 @@
-import java.sql.Connection;
+package miniproject1;import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
