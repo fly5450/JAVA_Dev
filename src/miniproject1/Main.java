@@ -335,12 +335,6 @@ public class Main {
         }
     }
 
-    // private static void checkAdminStatus() {
-    //     isAdmin = true;
-    //     System.out.println("관리자 모드로 전환되었습니다.");
-    // }
-    //프로그램 종료
-
     private static void programExit() {
         try {
             if (conn != null) conn.close();
